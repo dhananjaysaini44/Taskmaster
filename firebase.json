@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "life-manager-e5161",
+          "appId": "1:32544950004:android:b75d2ad24e13788246c0a1",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "life-manager-e5161",
+          "configurations": {
+            "android": "1:32544950004:android:b75d2ad24e13788246c0a1",
+            "ios": "1:32544950004:ios:41f72df699e99eb846c0a1",
+            "macos": "1:32544950004:ios:41f72df699e99eb846c0a1",
+            "web": "1:32544950004:web:9420b959cc4a620546c0a1",
+            "windows": "1:32544950004:web:d54f6f826d9b6b1e46c0a1"
+          }
+        }
+      }
+    }
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
+}
