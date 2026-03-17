@@ -8,6 +8,7 @@ class AppTheme {
         ? baseExtension.copyWith(
             primary: seedColor,
             taskAccentDefault: seedColor,
+            ambientGlow: seedColor.withOpacity(0.05),
           )
         : baseExtension;
 
@@ -32,6 +33,7 @@ class AppTheme {
         ? baseExtension.copyWith(
             primary: seedColor,
             taskAccentDefault: seedColor,
+            ambientGlow: seedColor.withOpacity(0.1),
           )
         : baseExtension;
 

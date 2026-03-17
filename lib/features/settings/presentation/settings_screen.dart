@@ -61,6 +61,17 @@ class SettingsScreen extends ConsumerWidget {
             selected: settingsState.seedColor ?? theme.primary,
             onChanged: (color) => settingsNotifier.setDefaultColor(color),
           ),
+          SizedBox(height: theme.spacingLG),
+          _buildSectionHeader(theme, 'Preferences'),
+          SizedBox(height: theme.spacingMD),
+          _buildPreferenceTile(
+            theme,
+            Icons.notifications_none_outlined,
+            'Enable Notifications',
+            settingsState.notificationsEnabled,
+            (value) => settingsNotifier.setNotificationsEnabled(value),
+          ),
+          _buildLanguageSelector(theme, settingsState, settingsNotifier),
           SizedBox(height: theme.spacingXL),
           _buildSectionHeader(theme, 'System Information'),
           SizedBox(height: theme.spacingMD),
@@ -198,6 +209,65 @@ class SettingsScreen extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildPreferenceTile(
+    AppThemeExtension theme,
+    IconData icon,
+    String title,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radiusLG),
+        side: BorderSide(color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent),
+      ),
+      color: theme.surface,
+      child: ListTile(
+        leading: Icon(icon, color: theme.primary),
+        title: Text(title, style: theme.bodyMedium),
+        trailing: Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeTrackColor: theme.primary.withValues(alpha: 0.5),
+          activeThumbColor: theme.primary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageSelector(
+    AppThemeExtension theme,
+    SettingsState state,
+    SettingsProvider notifier,
+  ) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radiusLG),
+        side: BorderSide(color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent),
+      ),
+      color: theme.surface,
+      child: ListTile(
+        leading: const Icon(Icons.language_outlined, color: Color(0xFF135BEC)),
+        title: const Text('Language'),
+        trailing: DropdownButton<String>(
+          value: state.language,
+          underline: const SizedBox(),
+          onChanged: (value) {
+            if (value != null) notifier.setLanguage(value);
+          },
+          items: const [
+            DropdownMenuItem(value: 'en', child: Text('English')),
+            DropdownMenuItem(value: 'es', child: Text('Spanish')),
+            DropdownMenuItem(value: 'fr', child: Text('French')),
+            DropdownMenuItem(value: 'hi', child: Text('Hindi')),
+          ],
+        ),
+      ),
     );
   }
 }

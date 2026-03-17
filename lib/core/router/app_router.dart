@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/auth_provider.dart';
+import '../../features/auth/presentation/splash_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
@@ -35,17 +36,23 @@ GoRouter appRouter(AppRouterRef ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final authValue = authState.valueOrNull;
+      final splashFinished = ref.watch(splashFinishedProvider);
       
       final isSplash = state.uri.path == '/splash';
       final isAuthRoute = state.uri.path == '/login' || state.uri.path == '/signup';
 
-      // 1. Handle Loading/Initialization
+      // 1. Wait for splash to finish if we are on splash
+      if (isSplash && !splashFinished) {
+        return null;
+      }
+
+      // 2. Handle Loading/Initialization
       if (authState.isLoading) {
         if (isSplash || isAuthRoute) return null;
         return '/splash';
       }
 
-      // 2. Handle Case where state is null
+      // 3. Handle Case where state is null
       if (authValue == null) {
         if (isAuthRoute) return null;
         return '/login';
@@ -56,13 +63,13 @@ GoRouter appRouter(AppRouterRef ref) {
         orElse: () => false,
       );
 
-      // 3. Force Login if unauthenticated
+      // 4. Force Login if unauthenticated
       if (!isAuth) {
         if (isAuthRoute) return null;
         return '/login';
       }
 
-      // 4. Force Home if authenticated and trying to access splash/login/signup
+      // 5. Force Home if authenticated and trying to access splash/login/signup
       if (isSplash || isAuthRoute) {
         return '/';
       }

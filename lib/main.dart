@@ -10,13 +10,13 @@ void main() async {
   
   runApp(
     const ProviderScope(
-      child: LifeManagerApp(),
+      child: TaskMasterApp(),
     ),
   );
 }
 
-class LifeManagerApp extends ConsumerWidget {
-  const LifeManagerApp({super.key});
+class TaskMasterApp extends ConsumerWidget {
+  const TaskMasterApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +24,7 @@ class LifeManagerApp extends ConsumerWidget {
     final settingsState = ref.watch(settingsProviderProvider);
 
     return MaterialApp.router(
-      title: 'Life Manager',
+      title: 'Task Master',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(seedColor: settingsState.seedColor),
       darkTheme: AppTheme.darkTheme(seedColor: settingsState.seedColor),

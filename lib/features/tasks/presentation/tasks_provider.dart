@@ -43,4 +43,8 @@ class TasksProvider extends _$TasksProvider {
   Future<void> deleteTask(String id) async {
     await ref.read(taskRepositoryProvider).deleteTask(id);
   }
+
+  Future<void> reorderTasks(int oldIndex, int newIndex) async {
+    await ref.read(taskRepositoryProvider).reorderTasks(oldIndex, newIndex);
+  }
 }

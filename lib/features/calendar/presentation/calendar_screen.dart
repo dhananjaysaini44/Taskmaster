@@ -36,7 +36,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final eventsAsync = ref.watch(eventsProviderProvider);
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: const GlassAppBar(
         title: Text('Calendar'),
@@ -117,7 +117,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           outsideDaysVisible: false,
         ),
         headerStyle: HeaderStyle(
-          formatButtonVisible: true,
+          formatButtonVisible: false,
           titleCentered: true,
           formatButtonTextStyle: TextStyle(color: theme.textSecondary),
           formatButtonDecoration: BoxDecoration(

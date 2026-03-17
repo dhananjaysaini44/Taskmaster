@@ -134,17 +134,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                   _animateWidget(
-                    Icon(Icons.lock_person_rounded, size: 64, color: theme.primary),
+                  _animateWidget(
+                    Center(
+                      child: Image.asset(
+                        'assets/logo.png',
+                        height: 80,
+                        width: 80,
+                      ),
+                    ),
                     0,
                   ),
                   SizedBox(height: theme.spacingLG),
                   _animateWidget(
                     Text(
                       'Welcome Back',
-                      style: theme.displayLarge.copyWith(fontSize: 32),
+                      style: theme.displayLarge.copyWith(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     1,

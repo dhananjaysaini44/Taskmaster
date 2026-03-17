@@ -13,6 +13,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
   final Color textSecondary;
   final Color textHint;
   final Color borderSecondary;
+  final Color ambientGlow;
+  final Color ambientPattern;
 
   final double spacingXS;
   final double spacingSM;
@@ -71,6 +73,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     required this.textSecondary,
     required this.textHint,
     required this.borderSecondary,
+    required this.ambientGlow,
+    required this.ambientPattern,
   });
 
   static AppThemeExtension light() => const AppThemeExtension(
@@ -137,6 +141,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
         textSecondary: Color(0xFF757575),
         textHint: Color(0xFF9E9E9E),
         borderSecondary: Color(0xFFE0E0E0),
+        ambientGlow: Color(0x0D135BEC),
+        ambientPattern: Color(0x05000000),
       );
 
   static AppThemeExtension dark() => const AppThemeExtension(
@@ -203,6 +209,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
         textSecondary: Color(0xFFAAAAAA),
         textHint: Color(0xFF757575),
         borderSecondary: Color(0xFF2C2C2C),
+        ambientGlow: Color(0x1A3B82F6),
+        ambientPattern: Color(0x08FFFFFF),
       );
 
   @override
@@ -236,6 +244,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     Color? textSecondary,
     Color? textHint,
     Color? borderSecondary,
+    Color? ambientGlow,
+    Color? ambientPattern,
   }) {
     return AppThemeExtension(
       primary: primary ?? this.primary,
@@ -267,6 +277,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       textSecondary: textSecondary ?? this.textSecondary,
       textHint: textHint ?? this.textHint,
       borderSecondary: borderSecondary ?? this.borderSecondary,
+      ambientGlow: ambientGlow ?? this.ambientGlow,
+      ambientPattern: ambientPattern ?? this.ambientPattern,
     );
   }
 
@@ -303,6 +315,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textHint: Color.lerp(textHint, other.textHint, t)!,
       borderSecondary: Color.lerp(borderSecondary, other.borderSecondary, t)!,
+      ambientGlow: Color.lerp(ambientGlow, other.ambientGlow, t)!,
+      ambientPattern: Color.lerp(ambientPattern, other.ambientPattern, t)!,
     );
   }
 }

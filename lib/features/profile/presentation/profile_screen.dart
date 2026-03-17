@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../tasks/presentation/tasks_provider.dart';
+import '../../settings/presentation/settings_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -13,6 +15,8 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context).appTheme;
     final authState = ref.watch(authProvider);
     final tasksAsync = ref.watch(tasksProviderProvider);
+    final settings = ref.watch(settingsProviderProvider);
+    final settingsNotifier = ref.read(settingsProviderProvider.notifier);
     
     final user = authState.valueOrNull?.maybeMap(
       authenticated: (a) => a.user,
@@ -20,7 +24,7 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: const GlassAppBar(
         title: Text('My Profile'),
@@ -96,16 +100,32 @@ class ProfileScreen extends ConsumerWidget {
             
             // Settings Tiles
             _buildSection(theme, 'General Settings', [
-              _buildTile(theme, Icons.settings_outlined, 'Account Settings', () {}),
-              _buildTile(theme, Icons.notifications_none_outlined, 'Notifications', () {}),
-              _buildTile(theme, Icons.shield_outlined, 'Privacy & Security', () {}),
+              _buildTile(theme, Icons.settings_outlined, 'Account Settings', () {
+                _showAccountInfo(context, user);
+              }),
+              _buildToggleTile(
+                theme, 
+                Icons.notifications_none_outlined, 
+                'Notifications', 
+                settings.notificationsEnabled,
+                (value) => settingsNotifier.setNotificationsEnabled(value),
+              ),
+              _buildTile(theme, Icons.shield_outlined, 'Privacy & Security', () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Privacy settings coming soon!')),
+                );
+              }),
             ]),
             
             const SizedBox(height: 24),
             
             _buildSection(theme, 'App Preferences', [
-              _buildTile(theme, Icons.palette_outlined, 'Appearance', () {}),
-              _buildTile(theme, Icons.language_outlined, 'Language', () {}),
+              _buildTile(theme, Icons.palette_outlined, 'Appearance', () {
+                context.push('/settings');
+              }),
+              _buildTile(theme, Icons.language_outlined, 'Language (${settings.language.toUpperCase()})', () {
+                _showLanguagePicker(context, ref);
+              }),
             ]),
             
             const SizedBox(height: 32),
@@ -164,8 +184,11 @@ class ProfileScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(theme.radiusLG),
             border: Border.all(color: theme.primary.withValues(alpha: 0.05)),
           ),
-          child: Column(
-            children: items,
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              children: items,
+            ),
           ),
         ),
       ],
@@ -179,6 +202,109 @@ class ProfileScreen extends ConsumerWidget {
       title: Text(title, style: theme.bodyMedium),
       trailing: Icon(Icons.chevron_right, color: theme.textHint, size: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
+    );
+  }
+
+  Widget _buildToggleTile(AppThemeExtension theme, IconData icon, String title, bool value, ValueChanged<bool> onChanged) {
+    return ListTile(
+      leading: Icon(icon, color: theme.primary, size: 22),
+      title: Text(title, style: theme.bodyMedium),
+      trailing: Switch.adaptive(
+        value: value,
+        onChanged: onChanged,
+        activeTrackColor: theme.primary.withValues(alpha: 0.5),
+        activeThumbColor: theme.primary,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
+    );
+  }
+
+  void _showAccountInfo(BuildContext context, dynamic user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context).appTheme;
+        return Container(
+          padding: EdgeInsets.all(theme.spacingLG),
+          decoration: BoxDecoration(
+            color: theme.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(theme.radiusXL)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.textHint.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
+              SizedBox(height: theme.spacingLG),
+              Text('Account Information', style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold)),
+              SizedBox(height: theme.spacingXL),
+              _buildInfoRow(theme, 'Name', user?.displayName ?? 'Not set'),
+              _buildInfoRow(theme, 'Email', user?.email ?? 'Not set'),
+              _buildInfoRow(theme, 'User ID', user?.uid ?? 'Unknown'),
+              SizedBox(height: theme.spacingXL),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                ),
+                child: const Text('Close'),
+              ),
+              SizedBox(height: theme.spacingLG),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(AppThemeExtension theme, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: theme.bodyMedium.copyWith(color: theme.textSecondary)),
+          Text(value, style: theme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final currentLang = ref.watch(settingsProviderProvider).language;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption(context, ref, 'English', 'en', currentLang == 'en'),
+            _buildLanguageOption(context, ref, 'Spanish', 'es', currentLang == 'es'),
+            _buildLanguageOption(context, ref, 'French', 'fr', currentLang == 'fr'),
+            _buildLanguageOption(context, ref, 'Hindi', 'hi', currentLang == 'hi'),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(BuildContext context, WidgetRef ref, String name, String code, bool isSelected) {
+    final theme = Theme.of(context).appTheme;
+    return ListTile(
+      title: Text(name),
+      trailing: isSelected ? Icon(Icons.check, color: theme.primary) : null,
+      onTap: () {
+        ref.read(settingsProviderProvider.notifier).setLanguage(code);
+        Navigator.pop(context);
+      },
     );
   }
 }

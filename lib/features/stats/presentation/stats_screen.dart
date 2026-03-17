@@ -17,7 +17,7 @@ class StatsScreen extends ConsumerWidget {
     final tasksAsync = ref.watch(tasksProviderProvider);
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: const GlassAppBar(
         title: Text('Task Analytics'),

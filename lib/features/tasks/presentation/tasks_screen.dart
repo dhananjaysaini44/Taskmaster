@@ -24,9 +24,11 @@ class TasksScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: theme.background,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         title: _TasksAppBarTitle(user: user, theme: theme),
         actions: [
           IconButton(
@@ -48,7 +50,7 @@ class TasksScreen extends ConsumerWidget {
                 if (filteredTasks.isEmpty) {
                   return _TasksEmptyState(filter: filter, theme: theme);
                 }
-                return _TasksList(tasks: filteredTasks);
+                return _TasksList(tasks: filteredTasks, filter: filter);
               },
               loading: () => _TasksLoadingState(theme: theme),
               error: (error, _) => Center(child: Text('Error: $error')),
@@ -152,76 +154,43 @@ class _TaskFilterChips extends ConsumerWidget {
   }
 }
 
-class _TasksList extends ConsumerStatefulWidget {
+class _TasksList extends ConsumerWidget {
   final List<TaskModel> tasks;
-  const _TasksList({required this.tasks});
+  final TaskFilter filter;
+  const _TasksList({required this.tasks, required this.filter});
 
   @override
-  ConsumerState<_TasksList> createState() => _TasksListState();
-}
-
-class _TasksListState extends ConsumerState<_TasksList> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  final List<TaskModel> _internalList = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _internalList.addAll(widget.tasks);
-  }
-
-  @override
-  void didUpdateWidget(_TasksList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncList(widget.tasks);
-  }
-
-  void _syncList(List<TaskModel> newList) {
-    for (int i = _internalList.length - 1; i >= 0; i--) {
-      final oldTask = _internalList[i];
-      if (!newList.any((t) => t.id == oldTask.id)) {
-        final removed = _internalList.removeAt(i);
-        _listKey.currentState?.removeItem(
-          i,
-          (context, animation) => _buildRemovedItem(removed, i, animation),
-        );
-      }
-    }
-    for (int i = 0; i < newList.length; i++) {
-      final newTask = newList[i];
-      final existingIndex = _internalList.indexWhere((t) => t.id == newTask.id);
-      if (existingIndex == -1) {
-        _internalList.insert(i, newTask);
-        _listKey.currentState?.insertItem(i);
-      } else {
-        _internalList[existingIndex] = newTask;
-      }
-    }
-  }
-
-  Widget _buildRemovedItem(TaskModel task, int index, Animation<double> animation) {
-    return FadeTransition(opacity: animation, child: TaskCard(task: task, index: index, onToggle: () {}, onDelete: () {}));
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context).appTheme;
-    return AnimatedList(
-      key: _listKey,
-      initialItemCount: _internalList.length,
+    
+    // ReorderableListView works best with a fixed order, but filters change the indices.
+    // For now, only allow reordering in 'All' filter to keep indices consistent with repository.
+    final bool isReorderable = filter == TaskFilter.all;
+
+    return ReorderableListView.builder(
+      itemCount: tasks.length,
       padding: EdgeInsets.only(left: theme.spacingLG, right: theme.spacingLG, bottom: 100),
-      itemBuilder: (context, index, animation) {
-        final task = _internalList[index];
-        return SlideTransition(
-          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-          child: TaskCard(
-            task: task,
-            index: index,
-            onToggle: () => ref.read(tasksProviderProvider.notifier).toggleComplete(task),
-            onDelete: () => ref.read(tasksProviderProvider.notifier).deleteTask(task.id),
-          ),
+      onReorderItem: (oldIndex, newIndex) {
+        if (isReorderable) {
+          ref.read(tasksProviderProvider.notifier).reorderTasks(oldIndex, newIndex);
+        }
+      },
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        return TaskCard(
+          key: ValueKey(task.id),
+          task: task,
+          onToggle: () => ref.read(tasksProviderProvider.notifier).toggleComplete(task),
+          onDelete: () => ref.read(tasksProviderProvider.notifier).deleteTask(task.id),
         );
       },
+      proxyDecorator: (child, index, animation) {
+        return Material(
+          color: Colors.transparent,
+          child: child,
+        );
+      },
+      buildDefaultDragHandles: true,
     );
   }
 }
