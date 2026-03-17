@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+context.md
 
 # IntelliJ related
 *.iml
@@ -43,3 +44,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets and Configuration
+lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+*.keystore
+*.jks
+key.properties
+.env*
