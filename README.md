@@ -7,13 +7,13 @@ Taskmaster is a premium, high-performance life management application built with
 
 Designed with a focus on **professional aesthetics** and a **seamless user experience**, Taskmaster integrates multi-platform support with real-time data synchronization.
 
-## ✨ Premium UI & UX
+## Premium UI & UX
 
 *   **Ambient Background**: A dynamic, glassmorphism-inspired ambient background that responds to your app's theme and depth.
 *   **Immersive Splash Screen**: A high-end initializing sequence with branded animations and progress tracking.
 *   **Glassmorphism Effects**: Modern UI components with subtle transparency and blur effects for a premium feel.
 
-## 🛠️ Core Features
+## Core Features
 
 ### Task Management
 *   **Interactive Task Lifecycle**: Complete control over task creation, categorization, and status tracking.
