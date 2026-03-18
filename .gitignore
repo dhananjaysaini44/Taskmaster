@@ -54,6 +54,3 @@ macos/Runner/GoogleService-Info.plist
 *.jks
 key.properties
 .env*
-
-# Documentation
-app_info/
