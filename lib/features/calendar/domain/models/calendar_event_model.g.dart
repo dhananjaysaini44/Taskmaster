@@ -16,6 +16,8 @@ _$CalendarEventModelImpl _$$CalendarEventModelImplFromJson(
   description: json['description'] as String?,
   category: json['category'] as String? ?? 'event',
   isAllDay: json['isAllDay'] as bool? ?? false,
+  isCompleted: json['isCompleted'] as bool? ?? false,
+  colorValue: (json['colorValue'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$CalendarEventModelImplToJson(
@@ -28,4 +30,6 @@ Map<String, dynamic> _$$CalendarEventModelImplToJson(
   'description': instance.description,
   'category': instance.category,
   'isAllDay': instance.isAllDay,
+  'isCompleted': instance.isCompleted,
+  'colorValue': instance.colorValue,
 };

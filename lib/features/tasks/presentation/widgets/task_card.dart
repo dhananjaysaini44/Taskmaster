@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../domain/task_model.dart';
+import 'add_task_modal.dart';
 
 class TaskCard extends ConsumerStatefulWidget {
   final TaskModel task;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
+  final bool isReorderable;
+  final int index;
 
   const TaskCard({
     super.key,
     required this.task,
     required this.onToggle,
     required this.onDelete,
+    required this.index,
+    this.isReorderable = false,
   });
 
   @override
@@ -27,6 +32,8 @@ class _TaskCardState extends ConsumerState<TaskCard> {
       task: widget.task,
       onToggle: widget.onToggle,
       onDelete: widget.onDelete,
+      isReorderable: widget.isReorderable,
+      index: widget.index,
     );
   }
 }
@@ -35,12 +42,16 @@ class _TaskCardContent extends StatelessWidget {
   final TaskModel task;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
+  final bool isReorderable;
+  final int index;
 
 
   const _TaskCardContent({
     required this.task,
     required this.onToggle,
     required this.onDelete,
+    required this.isReorderable,
+    required this.index,
   });
 
   @override
@@ -58,6 +69,12 @@ class _TaskCardContent extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
+          onTap: () => showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => AddTaskModal(task: task),
+          ),
           onLongPress: () => _showDeleteDialog(context),
           child: Container(
             decoration: BoxDecoration(
@@ -94,6 +111,18 @@ class _TaskCardContent extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (isReorderable)
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: theme.spacingSM),
+                        child: Icon(
+                          Icons.reorder,
+                          color: theme.textHint.withValues(alpha: 0.3),
+                          size: 20,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

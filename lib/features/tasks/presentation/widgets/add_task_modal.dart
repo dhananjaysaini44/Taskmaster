@@ -9,7 +9,8 @@ import '../../domain/task_model.dart';
 import '../tasks_provider.dart';
 
 class AddTaskModal extends ConsumerStatefulWidget {
-  const AddTaskModal({super.key});
+  final TaskModel? task;
+  const AddTaskModal({super.key, this.task});
 
   @override
   ConsumerState<AddTaskModal> createState() => _AddTaskModalState();
@@ -17,14 +18,31 @@ class AddTaskModal extends ConsumerStatefulWidget {
 
 class _AddTaskModalState extends ConsumerState<AddTaskModal> {
   final _titleController = TextEditingController();
-  TaskPriority _priority = TaskPriority.medium;
-  DateTime _dueDate = DateTime.now().add(const Duration(days: 1));
+  late TaskPriority _priority;
+  late DateTime _dueDate;
   late Color _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      _titleController.text = widget.task!.title;
+      _priority = widget.task!.priority;
+      _dueDate = widget.task!.dueDate;
+    } else {
+      _priority = TaskPriority.medium;
+      _dueDate = DateTime.now().add(const Duration(days: 1));
+    }
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _selectedColor = Theme.of(context).appTheme.taskAccentDefault;
+    if (widget.task != null) {
+      _selectedColor = Color(widget.task!.colorValue);
+    } else {
+      _selectedColor = Theme.of(context).appTheme.taskAccentDefault;
+    }
   }
 
   @override
@@ -73,12 +91,22 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
     if (title.isEmpty) return;
 
     try {
-      await ref.read(tasksProviderProvider.notifier).addTask(
-            title: title,
-            priority: _priority,
-            colorValue: _selectedColor.toARGB32(),
-            dueDate: _dueDate,
-          );
+      if (widget.task != null) {
+        final updatedTask = widget.task!.copyWith(
+          title: title,
+          priority: _priority,
+          colorValue: _selectedColor.toARGB32(),
+          dueDate: _dueDate,
+        );
+        await ref.read(tasksProviderProvider.notifier).updateTask(updatedTask);
+      } else {
+        await ref.read(tasksProviderProvider.notifier).addTask(
+              title: title,
+              priority: _priority,
+              colorValue: _selectedColor.toARGB32(),
+              dueDate: _dueDate,
+            );
+      }
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
@@ -117,20 +145,18 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.textHint.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          widget.task != null ? 'Edit Task' : 'New Task',
+                          style: theme.displayLarge.copyWith(fontSize: 28),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: theme.spacingLG),
-                    Text(
-                      'New Task',
-                      style: theme.displayLarge.copyWith(fontSize: 28),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Icon(Icons.close, color: theme.textPrimary),
+                        ),
+                      ],
                     ),
                     SizedBox(height: theme.spacingXL),
                     AuthTextField(
@@ -235,9 +261,9 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         shadowColor: theme.primary.withValues(alpha: 0.4),
                       ),
                       onPressed: _submit,
-                      child: const Text(
-                        'Add Task',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      child: Text(
+                        widget.task != null ? 'Update Task' : 'Add Task',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                     SizedBox(height: theme.spacingXL),

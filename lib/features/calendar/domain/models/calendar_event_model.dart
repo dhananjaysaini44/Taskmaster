@@ -13,6 +13,8 @@ class CalendarEventModel with _$CalendarEventModel {
     String? description,
     @Default('event') String category, // e.g., 'meeting', 'gym', 'work'
     @Default(false) bool isAllDay,
+    @Default(false) bool isCompleted,
+    int? colorValue,
   }) = _CalendarEventModel;
 
   factory CalendarEventModel.fromJson(Map<String, dynamic> json) =>

@@ -36,6 +36,10 @@ class TasksProvider extends _$TasksProvider {
   }
 
 
+  Future<void> updateTask(TaskModel task) async {
+    await ref.read(taskRepositoryProvider).updateTask(task);
+  }
+
   Future<void> toggleComplete(TaskModel task) async {
     await ref.read(taskRepositoryProvider).toggleComplete(task.id, task.isCompleted);
   }

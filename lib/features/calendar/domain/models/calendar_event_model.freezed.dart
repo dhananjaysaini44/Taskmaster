@@ -29,6 +29,8 @@ mixin _$CalendarEventModel {
   String get category =>
       throw _privateConstructorUsedError; // e.g., 'meeting', 'gym', 'work'
   bool get isAllDay => throw _privateConstructorUsedError;
+  bool get isCompleted => throw _privateConstructorUsedError;
+  int? get colorValue => throw _privateConstructorUsedError;
 
   /// Serializes this CalendarEventModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,6 +57,8 @@ abstract class $CalendarEventModelCopyWith<$Res> {
     String? description,
     String category,
     bool isAllDay,
+    bool isCompleted,
+    int? colorValue,
   });
 }
 
@@ -80,6 +84,8 @@ class _$CalendarEventModelCopyWithImpl<$Res, $Val extends CalendarEventModel>
     Object? description = freezed,
     Object? category = null,
     Object? isAllDay = null,
+    Object? isCompleted = null,
+    Object? colorValue = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -111,6 +117,14 @@ class _$CalendarEventModelCopyWithImpl<$Res, $Val extends CalendarEventModel>
                 ? _value.isAllDay
                 : isAllDay // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isCompleted: null == isCompleted
+                ? _value.isCompleted
+                : isCompleted // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            colorValue: freezed == colorValue
+                ? _value.colorValue
+                : colorValue // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -134,6 +148,8 @@ abstract class _$$CalendarEventModelImplCopyWith<$Res>
     String? description,
     String category,
     bool isAllDay,
+    bool isCompleted,
+    int? colorValue,
   });
 }
 
@@ -158,6 +174,8 @@ class __$$CalendarEventModelImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? category = null,
     Object? isAllDay = null,
+    Object? isCompleted = null,
+    Object? colorValue = freezed,
   }) {
     return _then(
       _$CalendarEventModelImpl(
@@ -189,6 +207,14 @@ class __$$CalendarEventModelImplCopyWithImpl<$Res>
             ? _value.isAllDay
             : isAllDay // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isCompleted: null == isCompleted
+            ? _value.isCompleted
+            : isCompleted // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        colorValue: freezed == colorValue
+            ? _value.colorValue
+            : colorValue // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -205,6 +231,8 @@ class _$CalendarEventModelImpl implements _CalendarEventModel {
     this.description,
     this.category = 'event',
     this.isAllDay = false,
+    this.isCompleted = false,
+    this.colorValue,
   });
 
   factory _$CalendarEventModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -227,10 +255,15 @@ class _$CalendarEventModelImpl implements _CalendarEventModel {
   @override
   @JsonKey()
   final bool isAllDay;
+  @override
+  @JsonKey()
+  final bool isCompleted;
+  @override
+  final int? colorValue;
 
   @override
   String toString() {
-    return 'CalendarEventModel(id: $id, title: $title, startTime: $startTime, endTime: $endTime, description: $description, category: $category, isAllDay: $isAllDay)';
+    return 'CalendarEventModel(id: $id, title: $title, startTime: $startTime, endTime: $endTime, description: $description, category: $category, isAllDay: $isAllDay, isCompleted: $isCompleted, colorValue: $colorValue)';
   }
 
   @override
@@ -248,7 +281,11 @@ class _$CalendarEventModelImpl implements _CalendarEventModel {
             (identical(other.category, category) ||
                 other.category == category) &&
             (identical(other.isAllDay, isAllDay) ||
-                other.isAllDay == isAllDay));
+                other.isAllDay == isAllDay) &&
+            (identical(other.isCompleted, isCompleted) ||
+                other.isCompleted == isCompleted) &&
+            (identical(other.colorValue, colorValue) ||
+                other.colorValue == colorValue));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,6 +299,8 @@ class _$CalendarEventModelImpl implements _CalendarEventModel {
     description,
     category,
     isAllDay,
+    isCompleted,
+    colorValue,
   );
 
   /// Create a copy of CalendarEventModel
@@ -290,6 +329,8 @@ abstract class _CalendarEventModel implements CalendarEventModel {
     final String? description,
     final String category,
     final bool isAllDay,
+    final bool isCompleted,
+    final int? colorValue,
   }) = _$CalendarEventModelImpl;
 
   factory _CalendarEventModel.fromJson(Map<String, dynamic> json) =
@@ -309,6 +350,10 @@ abstract class _CalendarEventModel implements CalendarEventModel {
   String get category; // e.g., 'meeting', 'gym', 'work'
   @override
   bool get isAllDay;
+  @override
+  bool get isCompleted;
+  @override
+  int? get colorValue;
 
   /// Create a copy of CalendarEventModel
   /// with the given fields replaced by the non-null parameter values.

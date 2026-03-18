@@ -11,45 +11,25 @@ class AmbientBackground extends StatelessWidget {
     final appTheme = theme.extension<AppThemeExtension>()!;
     final size = MediaQuery.of(context).size;
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: size.width,
       height: size.height,
-      color: theme.colorScheme.surface,
       child: Stack(
         children: [
-          // Background Base
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              isDark ? 'assets/bg_dark.png' : 'assets/bg_light.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          
+          // Subtle Overlay for Readability
           Positioned.fill(
             child: Container(
-              color: theme.colorScheme.surface,
-            ),
-          ),
-          
-          // Glow 1: Top Left
-          Positioned(
-            top: -size.height * 0.2,
-            left: -size.width * 0.2,
-            child: _AmbientGlow(
-              size: size.width * 1.2,
-              color: appTheme.ambientGlow,
-            ),
-          ),
-          
-          // Glow 2: Bottom Right
-          Positioned(
-            bottom: -size.height * 0.2,
-            right: -size.width * 0.2,
-            child: _AmbientGlow(
-              size: size.width * 1.2,
-              color: appTheme.ambientGlow,
-            ),
-          ),
-          
-          // Pattern Overlay
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _PatternPainter(
-                color: appTheme.ambientPattern,
-              ),
+              color: (isDark ? Colors.black : Colors.white).withOpacity(0.05),
             ),
           ),
         ],

@@ -24,7 +24,7 @@ final routerRefreshProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef RouterRefreshRef = AutoDisposeProviderRef<RouterRefreshNotifier>;
-String _$appRouterHash() => r'23b832739333455d118924d54e3ecc792582b61d';
+String _$appRouterHash() => r'23ca2c60a2c18fe41678614856063935670922df';
 
 /// See also [appRouter].
 @ProviderFor(appRouter)

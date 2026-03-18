@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../domain/task_model.dart';
 import 'tasks_provider.dart';
@@ -182,6 +181,8 @@ class _TasksList extends ConsumerWidget {
           task: task,
           onToggle: () => ref.read(tasksProviderProvider.notifier).toggleComplete(task),
           onDelete: () => ref.read(tasksProviderProvider.notifier).deleteTask(task.id),
+          isReorderable: isReorderable,
+          index: index,
         );
       },
       proxyDecorator: (child, index, animation) {
@@ -190,7 +191,7 @@ class _TasksList extends ConsumerWidget {
           child: child,
         );
       },
-      buildDefaultDragHandles: true,
+      buildDefaultDragHandles: false,
     );
   }
 }
