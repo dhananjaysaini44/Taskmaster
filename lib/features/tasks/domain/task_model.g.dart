@@ -10,8 +10,7 @@ _$TaskModelImpl _$$TaskModelImplFromJson(Map<String, dynamic> json) =>
     _$TaskModelImpl(
       id: json['id'] as String,
       title: json['title'] as String,
-      priority:
-          $enumDecodeNullable(_$TaskPriorityEnumMap, json['priority']) ??
+      priority: $enumDecodeNullable(_$TaskPriorityEnumMap, json['priority']) ??
           TaskPriority.medium,
       colorValue: (json['colorValue'] as num?)?.toInt() ?? 0xFF42A5F5,
       isCompleted: json['isCompleted'] as bool? ?? false,

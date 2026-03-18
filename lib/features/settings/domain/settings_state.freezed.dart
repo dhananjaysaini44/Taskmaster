@@ -12,8 +12,7 @@ part of 'settings_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SettingsState _$SettingsStateFromJson(Map<String, dynamic> json) {
   return _SettingsState.fromJson(json);
@@ -24,12 +23,8 @@ mixin _$SettingsState {
   ThemeMode get themeMode => throw _privateConstructorUsedError;
   int get defaultAccentColorValue => throw _privateConstructorUsedError;
 
-  /// Serializes this SettingsState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SettingsState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SettingsStateCopyWith<SettingsState> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -37,9 +32,8 @@ mixin _$SettingsState {
 /// @nodoc
 abstract class $SettingsStateCopyWith<$Res> {
   factory $SettingsStateCopyWith(
-    SettingsState value,
-    $Res Function(SettingsState) then,
-  ) = _$SettingsStateCopyWithImpl<$Res, SettingsState>;
+          SettingsState value, $Res Function(SettingsState) then) =
+      _$SettingsStateCopyWithImpl<$Res, SettingsState>;
   @useResult
   $Res call({ThemeMode themeMode, int defaultAccentColorValue});
 }
@@ -54,27 +48,22 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SettingsState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? themeMode = null,
     Object? defaultAccentColorValue = null,
   }) {
-    return _then(
-      _value.copyWith(
-            themeMode: null == themeMode
-                ? _value.themeMode
-                : themeMode // ignore: cast_nullable_to_non_nullable
-                      as ThemeMode,
-            defaultAccentColorValue: null == defaultAccentColorValue
-                ? _value.defaultAccentColorValue
-                : defaultAccentColorValue // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      themeMode: null == themeMode
+          ? _value.themeMode
+          : themeMode // ignore: cast_nullable_to_non_nullable
+              as ThemeMode,
+      defaultAccentColorValue: null == defaultAccentColorValue
+          ? _value.defaultAccentColorValue
+          : defaultAccentColorValue // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
   }
 }
 
@@ -82,9 +71,8 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
 abstract class _$$SettingsStateImplCopyWith<$Res>
     implements $SettingsStateCopyWith<$Res> {
   factory _$$SettingsStateImplCopyWith(
-    _$SettingsStateImpl value,
-    $Res Function(_$SettingsStateImpl) then,
-  ) = __$$SettingsStateImplCopyWithImpl<$Res>;
+          _$SettingsStateImpl value, $Res Function(_$SettingsStateImpl) then) =
+      __$$SettingsStateImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({ThemeMode themeMode, int defaultAccentColorValue});
@@ -95,40 +83,34 @@ class __$$SettingsStateImplCopyWithImpl<$Res>
     extends _$SettingsStateCopyWithImpl<$Res, _$SettingsStateImpl>
     implements _$$SettingsStateImplCopyWith<$Res> {
   __$$SettingsStateImplCopyWithImpl(
-    _$SettingsStateImpl _value,
-    $Res Function(_$SettingsStateImpl) _then,
-  ) : super(_value, _then);
+      _$SettingsStateImpl _value, $Res Function(_$SettingsStateImpl) _then)
+      : super(_value, _then);
 
-  /// Create a copy of SettingsState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? themeMode = null,
     Object? defaultAccentColorValue = null,
   }) {
-    return _then(
-      _$SettingsStateImpl(
-        themeMode: null == themeMode
-            ? _value.themeMode
-            : themeMode // ignore: cast_nullable_to_non_nullable
-                  as ThemeMode,
-        defaultAccentColorValue: null == defaultAccentColorValue
-            ? _value.defaultAccentColorValue
-            : defaultAccentColorValue // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
+    return _then(_$SettingsStateImpl(
+      themeMode: null == themeMode
+          ? _value.themeMode
+          : themeMode // ignore: cast_nullable_to_non_nullable
+              as ThemeMode,
+      defaultAccentColorValue: null == defaultAccentColorValue
+          ? _value.defaultAccentColorValue
+          : defaultAccentColorValue // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SettingsStateImpl implements _SettingsState {
-  const _$SettingsStateImpl({
-    this.themeMode = ThemeMode.system,
-    this.defaultAccentColorValue = 0xFF3B82F6,
-  });
+  const _$SettingsStateImpl(
+      {this.themeMode = ThemeMode.system,
+      this.defaultAccentColorValue = 0xFF3B82F6});
 
   factory _$SettingsStateImpl.fromJson(Map<String, dynamic> json) =>
       _$$SettingsStateImplFromJson(json);
@@ -153,20 +135,16 @@ class _$SettingsStateImpl implements _SettingsState {
             (identical(other.themeMode, themeMode) ||
                 other.themeMode == themeMode) &&
             (identical(
-                  other.defaultAccentColorValue,
-                  defaultAccentColorValue,
-                ) ||
+                    other.defaultAccentColorValue, defaultAccentColorValue) ||
                 other.defaultAccentColorValue == defaultAccentColorValue));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode =>
       Object.hash(runtimeType, themeMode, defaultAccentColorValue);
 
-  /// Create a copy of SettingsState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SettingsStateImplCopyWith<_$SettingsStateImpl> get copyWith =>
@@ -174,15 +152,16 @@ class _$SettingsStateImpl implements _SettingsState {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SettingsStateImplToJson(this);
+    return _$$SettingsStateImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SettingsState implements SettingsState {
-  const factory _SettingsState({
-    final ThemeMode themeMode,
-    final int defaultAccentColorValue,
-  }) = _$SettingsStateImpl;
+  const factory _SettingsState(
+      {final ThemeMode themeMode,
+      final int defaultAccentColorValue}) = _$SettingsStateImpl;
 
   factory _SettingsState.fromJson(Map<String, dynamic> json) =
       _$SettingsStateImpl.fromJson;
@@ -191,11 +170,8 @@ abstract class _SettingsState implements SettingsState {
   ThemeMode get themeMode;
   @override
   int get defaultAccentColorValue;
-
-  /// Create a copy of SettingsState
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SettingsStateImplCopyWith<_$SettingsStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

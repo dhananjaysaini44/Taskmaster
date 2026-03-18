@@ -66,7 +66,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    user?.displayName ?? 'User Name',
+                    user?.displayName ?? 'Taskmaster User',
                     style: theme.headlineSmall.copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(

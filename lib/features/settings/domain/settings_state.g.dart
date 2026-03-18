@@ -8,8 +8,7 @@ part of 'settings_state.dart';
 
 _$SettingsStateImpl _$$SettingsStateImplFromJson(Map<String, dynamic> json) =>
     _$SettingsStateImpl(
-      themeMode:
-          $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
+      themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
           ThemeMode.system,
       defaultAccentColorValue:
           (json['defaultAccentColorValue'] as num?)?.toInt() ?? 0xFF3B82F6,

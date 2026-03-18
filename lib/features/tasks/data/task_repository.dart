@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,9 +12,58 @@ class TaskRepository {
   final List<TaskModel> _tasks = [];
   final _controller = StreamController<List<TaskModel>>.broadcast();
   final Box _box;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+  StreamSubscription? _userSubscription;
 
   TaskRepository() : _box = Hive.box('tasks') {
     _loadTasks();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    _userSubscription = _auth.authStateChanges().listen((user) {
+      if (user != null) {
+        _syncWithCloud(user.uid);
+      }
+    });
+  }
+
+  Future<void> _syncWithCloud(String uid) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('tasks')
+          .orderBy('createdAt')
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final cloudTasks = snapshot.docs
+            .map((doc) => TaskModel.fromJson(doc.data()))
+            .toList();
+        
+        // Simple merge: cloud wins for now if there are any
+        _tasks.clear();
+        _tasks.addAll(cloudTasks);
+        await _saveTasksLocal();
+        _controller.add(List.from(_tasks));
+      } else if (_tasks.isNotEmpty) {
+        // If cloud is empty but local has data, upload local data
+        final batch = _firestore.batch();
+        for (final task in _tasks) {
+          final docRef = _firestore
+              .collection('users')
+              .doc(uid)
+              .collection('tasks')
+              .doc(task.id);
+          batch.set(docRef, task.toJson());
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      print('Error syncing tasks with cloud: $e');
+    }
   }
 
   void _loadTasks() {
@@ -29,8 +80,49 @@ class TaskRepository {
     }
   }
 
-  Future<void> _saveTasks() async {
+  Future<void> _saveTasksLocal() async {
     await _box.put('items', _tasks.map((t) => t.toJson()).toList());
+  }
+
+  Future<void> _saveTaskToCloud(TaskModel task) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('tasks')
+          .doc(task.id)
+          .set(task.toJson());
+    }
+  }
+
+  Future<void> _deleteTaskFromCloud(String id) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('tasks')
+          .doc(id)
+          .delete();
+    }
+  }
+
+  Future<void> _saveAllTasksToCloud() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final batch = _firestore.batch();
+      // First clear existing? Or just overwrite. Overwrite is safer for maps.
+      for (final task in _tasks) {
+        final docRef = _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('tasks')
+            .doc(task.id);
+        batch.set(docRef, task.toJson());
+      }
+      await batch.commit();
+    }
   }
 
   Stream<List<TaskModel>> watchTasks() async* {
@@ -54,7 +146,8 @@ class TaskRepository {
       dueDate: dueDate,
     );
     _tasks.add(newTask);
-    await _saveTasks();
+    await _saveTasksLocal();
+    await _saveTaskToCloud(newTask);
     _controller.add(List.from(_tasks));
   }
 
@@ -62,24 +155,31 @@ class TaskRepository {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
       _tasks[index] = _tasks[index].copyWith(isCompleted: !currentStatus);
-      await _saveTasks();
+      await _saveTasksLocal();
+      await _saveTaskToCloud(_tasks[index]);
       _controller.add(List.from(_tasks));
     }
   }
 
   Future<void> deleteTask(String id) async {
     _tasks.removeWhere((t) => t.id == id);
-    await _saveTasks();
+    await _saveTasksLocal();
+    await _deleteTaskFromCloud(id);
     _controller.add(List.from(_tasks));
   }
 
   Future<void> reorderTasks(int oldIndex, int newIndex) async {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
+    // Standard Flutter ReorderableListView adjustment
+    int adjustedNewIndex = newIndex;
+    if (oldIndex < adjustedNewIndex) {
+      adjustedNewIndex -= 1;
     }
+    
     final task = _tasks.removeAt(oldIndex);
-    _tasks.insert(newIndex, task);
-    await _saveTasks();
+    _tasks.insert(adjustedNewIndex, task);
+    
+    await _saveTasksLocal();
+    await _saveAllTasksToCloud(); // Reorder affects all or at least many, so resave all or updated ones.
     _controller.add(List.from(_tasks));
   }
 
@@ -87,9 +187,15 @@ class TaskRepository {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
       _tasks[index] = task;
-      await _saveTasks();
+      await _saveTasksLocal();
+      await _saveTaskToCloud(task);
       _controller.add(List.from(_tasks));
     }
+  }
+
+  void dispose() {
+    _userSubscription?.cancel();
+    _controller.close();
   }
 }
 

@@ -94,7 +94,7 @@ class _TasksAppBarTitle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome back,',
+                'Welcome',
                 style: theme.labelSmall.copyWith(color: theme.textSecondary),
               ),
               Text(
@@ -169,7 +169,7 @@ class _TasksList extends ConsumerWidget {
     return ReorderableListView.builder(
       itemCount: tasks.length,
       padding: EdgeInsets.only(left: theme.spacingLG, right: theme.spacingLG, bottom: 100),
-      onReorderItem: (oldIndex, newIndex) {
+      onReorder: (oldIndex, newIndex) {
         if (isReorderable) {
           ref.read(tasksProviderProvider.notifier).reorderTasks(oldIndex, newIndex);
         }

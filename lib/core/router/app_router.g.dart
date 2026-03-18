@@ -12,17 +12,15 @@ String _$routerRefreshHash() => r'8428fb6c27a86fcf4d75d073916926407c68fd2f';
 @ProviderFor(routerRefresh)
 final routerRefreshProvider =
     AutoDisposeProvider<RouterRefreshNotifier>.internal(
-      routerRefresh,
-      name: r'routerRefreshProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$routerRefreshHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  routerRefresh,
+  name: r'routerRefreshProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$routerRefreshHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef RouterRefreshRef = AutoDisposeProviderRef<RouterRefreshNotifier>;
 String _$appRouterHash() => r'23ca2c60a2c18fe41678614856063935670922df';
 
@@ -31,15 +29,12 @@ String _$appRouterHash() => r'23ca2c60a2c18fe41678614856063935670922df';
 final appRouterProvider = AutoDisposeProvider<GoRouter>.internal(
   appRouter,
   name: r'appRouterProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appRouterHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$appRouterHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef AppRouterRef = AutoDisposeProviderRef<GoRouter>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
