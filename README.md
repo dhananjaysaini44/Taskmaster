@@ -1,6 +1,13 @@
 # Taskmaster
 
-Taskmaster is a high-fidelity productivity suite developed with Flutter, designed to provide a sophisticated balance of task management, calendar coordination, and productivity analytics. The application adheres to a premium design philosophy, utilizing modern UI techniques to deliver an immersive "Ambient" user experience.
+[<img src="https://img.shields.io/badge/Flutter-%2302569B.svg?style=flat&logo=Flutter&logoColor=white" height="25">](https://flutter.dev)
+[<img src="https://img.shields.io/badge/Dart-%230175C2.svg?style=flat&logo=dart&logoColor=white" height="25">](https://dart.dev)
+[<img src="https://img.shields.io/badge/Riverpod-%2302569B.svg?style=flat&logo=riverpod&logoColor=white" height="25">](https://riverpod.dev)
+[<img src="https://img.shields.io/badge/Hive-%23FDC210.svg?style=flat&logo=hive&logoColor=black" height="25">](https://pub.dev/packages/hive)
+[<img src="https://img.shields.io/badge/Firebase-%23039BE5.svg?style=flat&logo=firebase" height="25">](https://firebase.google.com)
+
+Taskmaster is a high-fidelity productivity suite developed with Flutter, designed to provide a sophisticated balance of task management, calendar coordination, and productivity analytics.
+ The application adheres to a premium design philosophy, utilizing modern UI techniques to deliver an immersive "Ambient" user experience.
 
 ## Product Overview
 
@@ -33,12 +40,16 @@ Dynamic dashboards visualize completion metrics and performance trends, providin
 
 ## Technical Implementation
 
-Taskmaster is built upon a modern, reactive tech stack:
-- **Framework**: Flutter (Advanced UI Rendering)
-- **State Management**: Riverpod (Declarative and Type-Safe State)
-- **Local Storage**: Hive NoSQL (Offline-First Performance)
-- **Cloud Infrastructure**: Firebase Firestore (Real-Time Data Sync)
-- **Routing Engine**: GoRouter (Declarative Navigation Patterns)
+Taskmaster is built upon a modern, reactive tech stack optimized for performance and maintainability:
+
+| Technology | Category | Role in Taskmaster |
+| :--- | :--- | :--- |
+| **Flutter** | Core Framework | High-fidelity UI rendering and multi-platform consistency. |
+| **Dart** | Language | Reactive programming and efficient, type-safe business logic. |
+| **Riverpod** | State Management | Declarative state handling and robust dependency injection. |
+| **Hive** | Local Database | High-performance NoSQL storage for offline-first data persistence. |
+| **Firebase** | Cloud Infrastructure | Real-time data synchronization and secure cross-device authentication. |
+| **GoRouter** | Routing Engine | Declarative navigation and advanced deep-linking capabilities. |
 
 ## Architectural Pattern
 
@@ -49,31 +60,61 @@ The project follows a Feature-First Layered Architecture, promoting high modular
 
 ## Project Structure
 
-- `lib/core`: Global configurations, theme extensions, and application-wide utilities.
-- `lib/features`: Modular directories containing logic for authentication, tasks, calendar, analytics, and profile management.
-- `lib/shared`: Reusable infrastructure and "Ambient" UI assets.
-- `app_info/`: Comprehensive technical documentation and architectural guides.
+The project adheres to a **Feature-First Layered Architecture**, ensuring high modularity and scalability:
+
+```text
+taskmaster/
+├── android/            # Android platform-specific configurations
+├── assets/             # Global images, icons, and theme assets
+├── app_info/           # Technical documentation and guides
+│   ├── explanation.txt
+│   └── firebase_benefits.txt
+├── lib/
+│   ├── core/           # Shared utilities, routing, and theme definitions
+│   │   ├── router/
+│   │   ├── theme/
+│   │   └── utils/
+│   ├── features/       # Modular business logic and UI components
+│   │   ├── auth/       # Authentication, Login, Signup, Splash
+│   │   ├── calendar/   # Event scheduling and management
+│   │   ├── profile/    # User identity and profile settings
+│   │   ├── settings/   # Theme and application configuration
+│   │   ├── stats/      # Productivity analytics dashboard
+│   │   └── tasks/      # Core task management (CRUD, Reorder)
+│   ├── shared/         # Reusable widgets and UI components
+│   │   └── widgets/
+│   ├── firebase_options.dart
+│   └── main.dart
+├── test/               # Unit and widget test suites
+└── pubspec.yaml        # Project dependencies and metadata
+```
 
 ## Installation and Deployment
 
 ### Prerequisites
-- Flutter SDK (Latest Stable Channel)
-- Dart SDK
-- Configured development environment for target platforms (Web, Android, iOS, or Desktop).
+- **Flutter SDK**: `3.43.0-0.1.pre` (or later)
+- **Dart SDK**: `3.12.0`
+- **Platform Tools**: Configured environments for target platforms (Web, Android, iOS, or Desktop).
 
 ### Execution
-1. **Initialize Project**:
+1. **Clone Repository**:
+   ```bash
+   git clone https://github.com/dhananjaysaini44/taskmaster.git
+   cd taskmaster
+   ```
+
+2. **Initialize Project**:
    ```bash
    flutter pub get
    ```
 
-2. **Generate Dependencies**:
+3. **Generate Dependencies**:
    The project requires code generation for Hive and Riverpod components.
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```
 
-3. **Launch Application**:
+4. **Launch Application**:
    ```bash
    flutter run
    ```

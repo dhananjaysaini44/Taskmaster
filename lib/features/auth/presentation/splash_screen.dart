@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme_extension.dart';
+import '../../../core/utils/system_info.dart';
 import 'splash_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -99,11 +100,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              'v1.0.0',
-                              style: theme.labelSmall.copyWith(
-                                color: theme.textSecondary.withValues(alpha: 0.5),
-                              ),
+                            FutureBuilder<String>(
+                              future: SystemInfo.getAppVersion(),
+                              builder: (context, snapshot) {
+                                return Text(
+                                  'Version: ${snapshot.data?.split('+').first ?? '1.5.0'}',
+                                  style: theme.labelSmall.copyWith(
+                                    color: theme.textSecondary.withValues(alpha: 0.5),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
