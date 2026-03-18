@@ -78,7 +78,7 @@ For deeper technical insights, refer to the [app_info/](file:///c:/Users/DHANANJ
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/dhananjaysaini44/Life_manager_V2.git
+    git clone https://github.com/dhananjaysaini44/Taskmaster.git
     cd taskmaster
     ```
 
