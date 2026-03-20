@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart'; // Unnecessary
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../domain/models/calendar_event_model.dart';
@@ -60,7 +60,7 @@ class EventsProvider extends _$EventsProvider {
         await batch.commit();
       }
     } catch (e) {
-      print('Error syncing events with cloud: $e');
+      // debugPrint('Error syncing events with cloud: $e');
     }
     return localEvents;
   }

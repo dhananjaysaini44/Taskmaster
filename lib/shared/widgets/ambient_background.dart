@@ -29,7 +29,7 @@ class AmbientBackground extends StatelessWidget {
           // Subtle Overlay for Readability
           Positioned.fill(
             child: Container(
-              color: (isDark ? Colors.black : Colors.white).withOpacity(0.05),
+              color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.05),
             ),
           ),
         ],
@@ -57,8 +57,8 @@ class _AmbientGlow extends StatelessWidget {
         gradient: RadialGradient(
           colors: [
             color,
-            color.withOpacity(0.1),
-            color.withOpacity(0.0),
+            color.withValues(alpha: 0.1),
+            color.withValues(alpha: 0.0),
           ],
           stops: const [0.0, 0.5, 1.0],
         ),

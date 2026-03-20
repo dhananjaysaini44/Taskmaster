@@ -417,8 +417,8 @@ class _AddEventModalState extends ConsumerState<_AddEventModal> {
         color: theme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1.5,
+        color: theme.primary.withValues(alpha: 0.1),
+        width: 1.5,
         ),
       ),
       child: SingleChildScrollView(
@@ -603,7 +603,7 @@ class _AddEventModalState extends ConsumerState<_AddEventModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Category', style: TextStyle(color: Colors.white70, fontSize: 14)),
+        Text('Category', style: theme.labelSmall.copyWith(color: theme.textSecondary.withValues(alpha: 0.7))),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -634,11 +634,11 @@ class _AddEventModalState extends ConsumerState<_AddEventModal> {
               backgroundColor: theme.background,
               selectedColor: theme.primary.withValues(alpha: 0.2),
               labelStyle: TextStyle(
-                color: isSelected ? theme.primary : Colors.white70,
+                color: isSelected ? theme.primary : theme.textSecondary,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: isSelected ? theme.primary : Colors.white10),
+                side: BorderSide(color: isSelected ? theme.primary : theme.primary.withValues(alpha: 0.1)),
               ),
             );
           }).toList(),

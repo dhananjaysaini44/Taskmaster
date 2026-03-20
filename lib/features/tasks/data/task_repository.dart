@@ -62,7 +62,7 @@ class TaskRepository {
         await batch.commit();
       }
     } catch (e) {
-      print('Error syncing tasks with cloud: $e');
+      // debugPrint('Error syncing tasks with cloud: $e');
     }
   }
 
