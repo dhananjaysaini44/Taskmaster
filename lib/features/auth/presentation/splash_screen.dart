@@ -104,7 +104,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                               future: SystemInfo.getAppVersion(),
                               builder: (context, snapshot) {
                                 return Text(
-                                  'Version: ${snapshot.data?.split('+').first ?? '1.5.0'}',
+                                  'Version: ${snapshot.data?.split('+').first ?? '1.6.0'}',
                                   style: theme.labelSmall.copyWith(
                                     color: theme.textSecondary.withValues(alpha: 0.5),
                                   ),

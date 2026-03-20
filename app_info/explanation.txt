@@ -13,14 +13,16 @@ Key Technologies:
 - Hive (Local NoSQL Database for offline-first performance)
 - Firebase Firestore (Cloud Synchronization & Backup)
 - GoRouter (Navigation)
+- Data Isolation System (Ensures your data is private and separate from other users)
 
 2. SYSTEM ARCHITECTURE
 ----------------------
 The project follows a Feature-First Layered Architecture, which organizes code by "features" rather than technical types. Each feature typically consists of three layers:
 
 - Domain Layer: Contains the Data Models (the "what" of the data).
-- Data Layer: Handles storage, retrieval, and synchronization. This layer manages the "Hybrid Storage" logic—saving to Hive locally for speed and syncing with Firestore for cloud persistence.
-- Presentation Layer: Contains the UI (Screens/Widgets) and State Management (Providers).
+- Data Layer: Handles storage, retrieval, and synchronization. This layer manages the "Hybrid Storage" logic—instantly saving your data locally so the app feels fast, while simultaneously backing it up to the cloud so you never lose it.
+- Presentation Layer: contains the user interface (Screens/Widgets) and the logic that connects the data to what you see on screen.
+- Security Layer: A critical component that ensures your data is locked away in a private "vault" on your device, accessible only when you are signed into your specific account.
 
 Directory Structure:
 - /lib/core: Global configurations like the theme and routing.
@@ -162,7 +164,15 @@ Future<void> addTask(TaskModel task) async {
   }
 }
 ```
-*Explanation*: This "Offline-First" approach ensures the app is always responsive, even on poor connections.
+*How it works*: Imagine the app has a local "Notebook" (Hive) that it writes in immediately so you don't have to wait. At the same time, it sends a copy to a "Cloud Safe" (Firestore). If you get a new phone, the app just downloads everything from your "Cloud Safe" back into a new local "Notebook."
+
+D. Data Isolation & Privacy (Your Private Vault)
+The application is designed to be safe for use even on shared devices. We use a "Vault System" to keep every user's data completely separate.
+
+*   **Local Vaults (Hive)**: On your phone or computer, your tasks and events are stored in a unique "box" that is named after your unique account ID. When you log out, the app immediately "locks and clears" its memory of your data so the next person cannot see it.
+*   **Cloud Folders (Firestore)**: In the cloud, your data is stored in a private folder that only your account has permission to read or write to.
+
+*Simple Explanation*: Even if two people use the same Taskmaster app on the same phone, their tasks will never get mixed up. It's like having two different locked drawers in the same desk.
 
 C. Premium UI (Ambient Background)
 The app uses a custom `AmbientBackground` widget that blends gradients and theme-aware images behind the content.
@@ -182,6 +192,6 @@ To run the project locally:
 4. Launch via `flutter run`.
 
 ---
-Current Project State: Ver 1.5.0 - Hybrid Cloud Sync & Personalized UI Release
+Current Project State: Ver 1.6.0 - Enhanced Data Privacy & Security Release
 Documentation maintained by the Taskmaster Engineering Team.
 Dhananjay Saini (GitHub: @dhananjaysaini44)

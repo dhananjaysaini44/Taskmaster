@@ -19,9 +19,9 @@ The application is engineered for users who require a reliable and visually refi
 Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features theme-aware ambient backgrounds that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
 
 ### Hybrid Synchronization Engine
-The system utilizes a dual-layered persistence strategy:
-- **Local Persistence**: Powered by Hive, ensuring near-zero latency for all data operations.
-- **Cloud Synchronization**: Integrated with Firebase Firestore to provide real-time data redundancy and cross-platform synchronization.
+The system utilizes a sophisticated dual-layered persistence and isolation strategy:
+- **Local Persistence & Isolation**: Powered by Hive, ensuring near-zero latency. Data is partitioned into user-specific encrypted vaults (UID-prefixed boxes), ensuring strict multitenancy even on shared hardware.
+- **Cloud Synchronization**: Integrated with Firebase Firestore to provide real-time data redundancy, secure cross-platform synchronization, and a secondary layer of data isolation.
 
 ### Personalized User Interface
 The application features a personalized greeting system and profile management, ensuring that user identity is integrated throughout the productivity flow.
@@ -48,7 +48,7 @@ Taskmaster is built upon a modern, reactive tech stack optimized for performance
 | **Dart** | Language | Reactive programming and efficient, type-safe business logic. |
 | **Riverpod** | State Management | Declarative state handling and robust dependency injection. |
 | **Hive** | Local Database | High-performance NoSQL storage for offline-first data persistence. |
-| **Firebase** | Cloud Infrastructure | Real-time data synchronization and secure cross-device authentication. |
+| **Firebase** | Cloud Infrastructure | Real-time data synchronization, secure cross-device authentication, and cloud-side data isolation. |
 | **GoRouter** | Routing Engine | Declarative navigation and advanced deep-linking capabilities. |
 
 ## Architectural Pattern
@@ -126,4 +126,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: 1.5.0
+Project Version: 1.6.0

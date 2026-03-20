@@ -11,19 +11,47 @@ part 'task_repository.g.dart';
 class TaskRepository {
   final List<TaskModel> _tasks = [];
   final _controller = StreamController<List<TaskModel>>.broadcast();
-  final Box _box;
+  Box? _box;
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   StreamSubscription? _userSubscription;
 
-  TaskRepository() : _box = Hive.box('tasks') {
-    _loadTasks();
+  TaskRepository() {
     _setupAuthListener();
+    _initForCurrentUser();
+  }
+
+  Future<void> _initForCurrentUser() async {
+    _clearState();
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _openBox(user.uid);
+      _loadTasks();
+      _syncWithCloud(user.uid);
+    }
+  }
+
+  void _clearState() {
+    _tasks.clear();
+    _box = null;
+    _controller.add([]);
+  }
+
+  Future<void> _openBox(String uid) async {
+    final boxName = 'tasks_$uid';
+    if (!Hive.isBoxOpen(boxName)) {
+      _box = await Hive.openBox(boxName);
+    } else {
+      _box = Hive.box(boxName);
+    }
   }
 
   void _setupAuthListener() {
-    _userSubscription = _auth.authStateChanges().listen((user) {
+    _userSubscription = _auth.authStateChanges().listen((user) async {
+      _clearState();
       if (user != null) {
+        await _openBox(user.uid);
+        _loadTasks();
         _syncWithCloud(user.uid);
       }
     });
@@ -67,7 +95,8 @@ class TaskRepository {
   }
 
   void _loadTasks() {
-    final List<dynamic>? data = _box.get('items');
+    if (_box == null) return;
+    final List<dynamic>? data = _box!.get('items');
     if (data != null) {
       _tasks.clear();
       for (final item in data) {
@@ -81,7 +110,8 @@ class TaskRepository {
   }
 
   Future<void> _saveTasksLocal() async {
-    await _box.put('items', _tasks.map((t) => t.toJson()).toList());
+    if (_box == null) return;
+    await _box!.put('items', _tasks.map((t) => t.toJson()).toList());
   }
 
   Future<void> _saveTaskToCloud(TaskModel task) async {

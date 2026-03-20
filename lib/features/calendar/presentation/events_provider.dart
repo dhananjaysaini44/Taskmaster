@@ -10,24 +10,37 @@ part 'events_provider.g.dart';
 
 @riverpod
 class EventsProvider extends _$EventsProvider {
-  late final Box _box;
+  Box? _box;
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
   @override
   AsyncValue<List<CalendarEventModel>> build() {
-    _box = Hive.box('events');
-    final localEvents = _loadEvents();
-    
-    // Trigger async sync in the background
     final user = _auth.currentUser;
-    if (user != null) {
+    if (user == null) {
+      return const AsyncValue.data([]);
+    }
+
+    _openBox(user.uid).then((_) {
+      final localEvents = _loadEvents();
+      state = AsyncValue.data(localEvents);
+      
+      // Trigger async sync in the background
       _syncWithCloud(user.uid, localEvents).then((cloudEvents) {
         state = AsyncValue.data(cloudEvents);
       });
-    }
+    });
     
-    return AsyncValue.data(localEvents);
+    return const AsyncValue.loading();
+  }
+
+  Future<void> _openBox(String uid) async {
+    final boxName = 'events_$uid';
+    if (!Hive.isBoxOpen(boxName)) {
+      _box = await Hive.openBox(boxName);
+    } else {
+      _box = Hive.box(boxName);
+    }
   }
 
   Future<List<CalendarEventModel>> _syncWithCloud(String uid, List<CalendarEventModel> localEvents) async {
@@ -66,7 +79,8 @@ class EventsProvider extends _$EventsProvider {
   }
 
   List<CalendarEventModel> _loadEvents() {
-    final List<dynamic>? data = _box.get('items');
+    if (_box == null) return [];
+    final List<dynamic>? data = _box!.get('items');
     if (data != null) {
       return data
           .map((item) => CalendarEventModel.fromJson(Map<String, dynamic>.from(item as Map)))
@@ -76,7 +90,8 @@ class EventsProvider extends _$EventsProvider {
   }
 
   Future<void> _saveEventsLocal(List<CalendarEventModel> events) async {
-    await _box.put('items', events.map((e) => e.toJson()).toList());
+    if (_box == null) return;
+    await _box!.put('items', events.map((e) => e.toJson()).toList());
   }
 
   Future<void> _saveEventToCloud(CalendarEventModel event) async {
