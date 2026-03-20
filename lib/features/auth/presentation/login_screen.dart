@@ -125,9 +125,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final isLoading = ref.watch(authProvider).isLoading;
 
     return Scaffold(
-      backgroundColor: theme.background,
-      body: SafeArea(
-        child: Center(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              Theme.of(context).brightness == Brightness.dark
+                  ? 'assets/splash_bg_dark.png'
+                  : 'assets/splash_bg_light.png',
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(theme.spacingLG),
             child: Form(
@@ -272,6 +282,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ),
           ),
+        ),
         ),
       ),
     );

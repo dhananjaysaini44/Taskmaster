@@ -5,6 +5,7 @@ import '../../../shared/widgets/glass_app_bar.dart';
 import '../domain/task_model.dart';
 import '../domain/task_filter.dart';
 import 'tasks_provider.dart';
+import 'tasks_filter_provider.dart';
 import 'widgets/task_card.dart';
 import 'widgets/add_task_modal.dart';
 

@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../shared/widgets/glass_app_bar.dart';
 import '../../tasks/presentation/tasks_provider.dart';
 import '../../tasks/domain/task_model.dart';
-import 'package:intl/intl.dart';
 import '../../tasks/presentation/widgets/add_task_modal.dart';
-
 import '../../auth/presentation/auth_provider.dart';
+import '../domain/home_stats.dart';
+import './widgets/stat_card.dart';
+import './widgets/priority_distribution_chart.dart';
+import './widgets/overview_item.dart';
+import './widgets/deadline_tile.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Only context is needed for most builders now
+    return const _HomeScreenContent();
+  }
+}
+
+class _HomeScreenContent extends ConsumerWidget {
+  const _HomeScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +37,7 @@ class HomeScreen extends ConsumerWidget {
     final tasksAsync = ref.watch(tasksProviderProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent, // Required for ambient background
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(
         title: _HomeAppBarTitle(user: user, theme: theme),
@@ -35,63 +47,98 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () => context.push('/settings'),
             tooltip: 'Settings',
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: theme.spacingSM),
         ],
       ),
       body: tasksAsync.when(
-        data: (tasks) => _buildBody(context, ref, theme, tasks),
+        data: (tasks) => _HomeBody(tasks: tasks, theme: theme),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
     );
   }
+}
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, AppThemeExtension theme, List<TaskModel> tasks) {
-    final completedTasks = tasks.where((t) => t.isCompleted).length;
-    final totalTasks = tasks.length;
-    final efficiency = totalTasks > 0 ? (completedTasks / totalTasks * 100).toInt() : 0;
-    
-    // Group tasks by priority for charting
-    final highPriority = tasks.where((t) => t.priority == TaskPriority.high).length;
-    final mediumPriority = tasks.where((t) => t.priority == TaskPriority.medium).length;
-    final lowPriority = tasks.where((t) => t.priority == TaskPriority.low).length;
+class _HomeBody extends ConsumerWidget {
+  final List<TaskModel> tasks;
+  final AppThemeExtension theme;
+
+  const _HomeBody({required this.tasks, required this.theme});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = HomeStats.fromTasks(tasks);
+    final upcoming = tasks.where((t) => !t.isCompleted).toList()
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final displayTasks = upcoming.take(3).toList();
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight + theme.spacingMD),
-          _buildSummaryCards(theme, totalTasks, efficiency),
-          const SizedBox(height: 32),
-          _buildPriorityDistribution(theme, highPriority, mediumPriority, lowPriority),
-          const SizedBox(height: 32),
-          _buildCompletionOverview(theme, completedTasks, totalTasks),
-          const SizedBox(height: 32),
-          _buildUpcomingDeadlines(context, ref, theme, tasks),
+          SizedBox(
+            height: MediaQuery.of(context).padding.top +
+                kToolbarHeight,
+          ),
+          _SummaryCards(stats: stats, theme: theme),
+          SizedBox(height: theme.spacingXL),
+          PriorityDistributionChart(
+            theme: theme,
+            high: stats.highPriority,
+            medium: stats.mediumPriority,
+            low: stats.lowPriority,
+          ),
+          SizedBox(height: theme.spacingXL),
+          _CompletionOverview(stats: stats, theme: theme),
+          SizedBox(height: theme.spacingXL),
+          _UpcomingSection(
+            displayTasks: displayTasks,
+            theme: theme,
+            onAddTask: () => _showAddTask(context),
+            onToggle: (task) =>
+                ref.read(tasksProviderProvider.notifier).toggleComplete(task),
+          ),
           const SizedBox(height: 100),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCards(AppThemeExtension theme, int total, int efficiency) {
+  void _showAddTask(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddTaskModal(),
+    );
+  }
+}
+
+class _SummaryCards extends StatelessWidget {
+  final HomeStats stats;
+  final AppThemeExtension theme;
+
+  const _SummaryCards({required this.stats, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: _StatCard(
+          child: StatCard(
             title: 'Total Tasks',
-            value: total.toString(),
+            value: stats.totalTasks.toString(),
             icon: Icons.assignment_outlined,
             color: theme.primary,
             theme: theme,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: theme.spacingMD),
         Expanded(
-          child: _StatCard(
+          child: StatCard(
             title: 'Efficiency',
-            value: '$efficiency%',
+            value: '${stats.efficiency}%',
             icon: Icons.bolt_outlined,
             color: theme.accent,
             theme: theme,
@@ -100,47 +147,28 @@ class HomeScreen extends ConsumerWidget {
       ],
     );
   }
+}
 
-  Widget _buildPriorityDistribution(AppThemeExtension theme, int high, int med, int low) {
+class _CompletionOverview extends StatelessWidget {
+  final HomeStats stats;
+  final AppThemeExtension theme;
+
+  const _CompletionOverview({required this.stats, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = stats.totalTasks - stats.completedTasks;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Priority Distribution', style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Container(
-          height: 200,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.surface.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(theme.radiusLG),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
-          ),
-          child: PieChart(
-            PieChartData(
-              sectionsSpace: 4,
-              centerSpaceRadius: 40,
-              sections: [
-                PieChartSectionData(value: high.toDouble(), color: Colors.redAccent, title: 'High', radius: 50, titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                PieChartSectionData(value: med.toDouble(), color: Colors.orangeAccent, title: 'Med', radius: 50, titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                PieChartSectionData(value: low.toDouble(), color: theme.primary, title: 'Low', radius: 50, titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-              ],
-            ),
-          ),
+        Text(
+          'Completion Overview',
+          style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
-      ],
-    );
-  }
-
-  Widget _buildCompletionOverview(AppThemeExtension theme, int completed, int total) {
-    final pending = total - completed;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Completion Overview', style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
+        SizedBox(height: theme.spacingMD),
         Container(
           height: 150,
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(theme.spacingLG),
           decoration: BoxDecoration(
             color: theme.surface.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(theme.radiusLG),
@@ -149,53 +177,74 @@ class HomeScreen extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _OverviewItem(label: 'Completed', value: completed, color: theme.accent, theme: theme),
-              _OverviewItem(label: 'Pending', value: pending, color: theme.textHint, theme: theme),
+              OverviewItem(
+                label: 'Completed',
+                value: stats.completedTasks,
+                color: theme.accent,
+                theme: theme,
+              ),
+              OverviewItem(
+                label: 'Pending',
+                value: pending,
+                color: theme.textHint,
+                theme: theme,
+              ),
             ],
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildUpcomingDeadlines(BuildContext context, WidgetRef ref, AppThemeExtension theme, List<TaskModel> tasks) {
-    final upcoming = tasks.where((t) => !t.isCompleted).toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
-    
-    final displayTasks = upcoming.take(3).toList();
+class _UpcomingSection extends StatelessWidget {
+  final List<TaskModel> displayTasks;
+  final AppThemeExtension theme;
+  final VoidCallback onAddTask;
+  final Function(TaskModel) onToggle;
 
+  const _UpcomingSection({
+    required this.displayTasks,
+    required this.theme,
+    required this.onAddTask,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Upcoming Deadlines', style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Upcoming Deadlines',
+              style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            ),
             IconButton(
-              onPressed: () => showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const AddTaskModal(),
-              ),
+              onPressed: onAddTask,
               icon: Icon(Icons.add_circle_outline, color: theme.primary),
               tooltip: 'Quick Add Task',
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: theme.spacingSM),
         if (displayTasks.isEmpty)
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text('No upcoming deadlines', style: theme.bodyMedium.copyWith(color: theme.textHint)),
+              padding: EdgeInsets.all(theme.spacingXL),
+              child: Text(
+                'No upcoming deadlines',
+                style: theme.bodyMedium.copyWith(color: theme.textHint),
+              ),
             ),
           )
         else
-          ...displayTasks.map((task) => _DeadlineTile(
+          ...displayTasks.map((task) => DeadlineTile(
                 task: task,
                 theme: theme,
-                onToggle: () => ref.read(tasksProviderProvider.notifier).toggleComplete(task),
+                onToggle: () => onToggle(task),
               )),
       ],
     );
@@ -209,141 +258,34 @@ class _HomeAppBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: theme.primary.withValues(alpha: 0.2),
-          backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-          child: user?.photoURL == null ? Icon(Icons.person, size: 20, color: theme.primary) : null,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome',
-                style: theme.labelSmall.copyWith(color: theme.textSecondary),
-              ),
-              Text(
-                user?.displayName ?? 'User',
-                style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final AppThemeExtension theme;
-
-  const _StatCard({required this.title, required this.value, required this.icon, required this.color, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(theme.radiusLG),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(height: 12),
-          Text(value, style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(title, style: theme.labelSmall.copyWith(color: theme.textSecondary)),
-        ],
-      ),
-    );
-  }
-}
-
-class _OverviewItem extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color color;
-  final AppThemeExtension theme;
-
-  const _OverviewItem({required this.label, required this.value, required this.color, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(value.toString(), style: theme.titleLarge.copyWith(color: color, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(label, style: theme.labelSmall.copyWith(color: theme.textSecondary)),
-      ],
-    );
-  }
-}
-
-class _DeadlineTile extends StatelessWidget {
-  final TaskModel task;
-  final AppThemeExtension theme;
-  final VoidCallback onToggle;
-
-  const _DeadlineTile({required this.task, required this.theme, required this.onToggle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.surface.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(theme.radiusLG),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.05)),
-      ),
+    return InkWell(
+      onTap: () => context.push('/profile'),
       child: Row(
         children: [
-          Container(
-            width: 4,
-            height: 40,
-            decoration: BoxDecoration(
-              color: task.priorityColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: theme.primary.withValues(alpha: 0.2),
+            backgroundImage:
+                user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+            child: user?.photoURL == null
+                ? Icon(Icons.person, size: 20, color: theme.primary)
+                : null,
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: theme.spacingSM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  task.title,
-                  style: theme.titleSmall.copyWith(
-                    fontWeight: FontWeight.bold,
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Due ${DateFormat('MMM dd, hh:mm a').format(task.dueDate)}',
+                  'Welcome',
                   style: theme.labelSmall.copyWith(color: theme.textSecondary),
+                ),
+                Text(
+                  user?.displayName ?? 'User',
+                  style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: Icon(
-              task.isCompleted ? Icons.check_circle : Icons.circle_outlined,
-              color: task.isCompleted ? theme.accent : theme.textHint.withValues(alpha: 0.5),
-            ),
-            onPressed: onToggle,
           ),
         ],
       ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/settings_repository.dart';
+
+part 'settings_provider.g.dart';
 
 class SettingsState {
   final ThemeMode themeMode;
@@ -30,12 +33,15 @@ class SettingsState {
   }
 }
 
-class SettingsProvider extends StateNotifier<SettingsState> {
-  final SettingsRepository _repository;
+@riverpod
+class SettingsProvider extends _$SettingsProvider {
+  late SettingsRepository _repository;
 
-  SettingsProvider(this._repository)
-      : super(SettingsState(themeMode: ThemeMode.system)) {
-    _init();
+  @override
+  SettingsState build() {
+    _repository = ref.watch(settingsRepositoryProvider);
+    _init(); // Trigger async load
+    return SettingsState(themeMode: ThemeMode.system);
   }
 
   Future<void> _init() async {
@@ -72,10 +78,5 @@ class SettingsProvider extends StateNotifier<SettingsState> {
   }
 }
 
-final settingsRepositoryProvider = Provider((ref) => SettingsRepository());
-
-final settingsProviderProvider =
-    StateNotifierProvider<SettingsProvider, SettingsState>((ref) {
-  final repo = ref.watch(settingsRepositoryProvider);
-  return SettingsProvider(repo);
-});
+@riverpod
+SettingsRepository settingsRepository(Ref ref) => SettingsRepository();

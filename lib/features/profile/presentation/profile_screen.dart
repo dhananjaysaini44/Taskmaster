@@ -6,7 +6,10 @@ import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../tasks/presentation/tasks_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
+import '../../home/domain/home_stats.dart';
 import './widgets/edit_profile_dialog.dart';
+import './widgets/profile_header.dart';
+import './widgets/settings_section.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -18,14 +21,14 @@ class ProfileScreen extends ConsumerWidget {
     final tasksAsync = ref.watch(tasksProviderProvider);
     final settings = ref.watch(settingsProviderProvider);
     final settingsNotifier = ref.read(settingsProviderProvider.notifier);
-    
+
     final user = authState.valueOrNull?.maybeMap(
       authenticated: (a) => a.user,
       orElse: () => null,
     );
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent, // Required for ambient background
       extendBodyBehindAppBar: true,
       appBar: const GlassAppBar(
         title: Text('My Profile'),
@@ -34,189 +37,104 @@ class ProfileScreen extends ConsumerWidget {
         padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
         child: Column(
           children: [
-            SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight + theme.spacingLG),
-            
-            // Profile Header
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: theme.primaryGradient,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.primary.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        user?.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                        style: theme.titleLarge.copyWith(
-                          fontSize: 40,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    user?.displayName ?? 'Taskmaster User',
-                    style: theme.headlineSmall.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    user?.email ?? 'user@example.com',
-                    style: theme.bodyMedium.copyWith(color: theme.textHint),
-                  ),
-                ],
-              ),
+            SizedBox(
+              height: MediaQuery.of(context).padding.top +
+                  kToolbarHeight +
+                  theme.spacingLG,
             ),
-            
-            const SizedBox(height: 32),
-            
-            // Task Stats Row
+            ProfileHeader(user: user, theme: theme),
+            SizedBox(height: theme.spacingXL),
             tasksAsync.when(
               data: (tasks) {
-                final completed = tasks.where((t) => t.isCompleted).length;
-                final pending = tasks.length - completed;
+                final stats = HomeStats.fromTasks(tasks);
+                final pending = stats.totalTasks - stats.completedTasks;
                 return Row(
                   children: [
-                    Expanded(child: _buildSmallStat(theme, 'Completed', completed.toString(), theme.accent)),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildSmallStat(theme, 'Pending', pending.toString(), theme.primary)),
+                    Expanded(
+                      child: _SmallStatCard(
+                        theme: theme,
+                        label: 'Completed',
+                        value: stats.completedTasks.toString(),
+                        color: theme.accent,
+                      ),
+                    ),
+                    SizedBox(width: theme.spacingMD),
+                    Expanded(
+                      child: _SmallStatCard(
+                        theme: theme,
+                        label: 'Pending',
+                        value: pending.toString(),
+                        color: theme.primary,
+                      ),
+                    ),
                   ],
                 );
               },
-              loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator())),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Settings Tiles
-            _buildSection(theme, 'General Settings', [
-              _buildTile(theme, Icons.settings_outlined, 'Account Settings', () {
-                _showAccountInfo(context, user);
-              }),
-              _buildToggleTile(
-                theme, 
-                Icons.notifications_none_outlined, 
-                'Notifications', 
-                settings.notificationsEnabled,
-                (value) => settingsNotifier.setNotificationsEnabled(value),
+              loading: () => SizedBox(
+                height: 80,
+                child: const Center(child: CircularProgressIndicator()),
               ),
-              _buildTile(theme, Icons.shield_outlined, 'Privacy & Security', () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Privacy settings coming soon!')),
-                );
-              }),
-            ]),
-            
-            const SizedBox(height: 24),
-            
-            _buildSection(theme, 'App Preferences', [
-              _buildTile(theme, Icons.palette_outlined, 'Appearance', () {
-                context.push('/settings');
-              }),
-              _buildTile(theme, Icons.language_outlined, 'Language (${settings.language.toUpperCase()})', () {
-                _showLanguagePicker(context, ref);
-              }),
-            ]),
-            
-            const SizedBox(height: 32),
-            
-            // Logout Button
-            TextButton.icon(
+              error: (error, _) => const SizedBox.shrink(),
+            ),
+            SizedBox(height: theme.spacingXL),
+            SettingsSection(
+              theme: theme,
+              title: 'General Settings',
+              items: [
+                SettingsTile(
+                  theme: theme,
+                  icon: Icons.settings_outlined,
+                  title: 'Account Settings',
+                  onTap: () => _showAccountInfo(context, user),
+                ),
+                SettingsToggleTile(
+                  theme: theme,
+                  icon: Icons.notifications_none_outlined,
+                  title: 'Notifications',
+                  value: settings.notificationsEnabled,
+                  onChanged: (value) =>
+                      settingsNotifier.setNotificationsEnabled(value),
+                ),
+                SettingsTile(
+                  theme: theme,
+                  icon: Icons.shield_outlined,
+                  title: 'Privacy & Security',
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Privacy settings coming soon!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: theme.spacingLG),
+            SettingsSection(
+              theme: theme,
+              title: 'App Preferences',
+              items: [
+                SettingsTile(
+                  theme: theme,
+                  icon: Icons.palette_outlined,
+                  title: 'Appearance',
+                  onTap: () => context.push('/settings'),
+                ),
+                SettingsTile(
+                  theme: theme,
+                  icon: Icons.language_outlined,
+                  title: 'Language (${settings.language.toUpperCase()})',
+                  onTap: () => _showLanguagePicker(context, ref),
+                ),
+              ],
+            ),
+            SizedBox(height: theme.spacingXL),
+            _LogoutButton(
+              theme: theme,
               onPressed: () => ref.read(authProvider.notifier).signOut(),
-              icon: const Icon(Icons.logout, color: Colors.redAccent),
-              label: Text(
-                'Sign Out',
-                style: theme.bodyLarge.copyWith(color: Colors.redAccent, fontWeight: FontWeight.bold),
-              ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
-              ),
             ),
-            
             const SizedBox(height: 100),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSmallStat(AppThemeExtension theme, String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(theme.radiusMD),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: theme.titleLarge.copyWith(color: color, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(label, style: theme.labelSmall.copyWith(color: theme.textSecondary)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(AppThemeExtension theme, String title, List<Widget> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(title, style: theme.labelLarge.copyWith(color: theme.textSecondary, fontWeight: FontWeight.bold)),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: theme.surface.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(theme.radiusLG),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.05)),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              children: items,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTile(AppThemeExtension theme, IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(icon, color: theme.primary, size: 22),
-      title: Text(title, style: theme.bodyMedium),
-      trailing: Icon(Icons.chevron_right, color: theme.textHint, size: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
-    );
-  }
-
-  Widget _buildToggleTile(AppThemeExtension theme, IconData icon, String title, bool value, ValueChanged<bool> onChanged) {
-    return ListTile(
-      leading: Icon(icon, color: theme.primary, size: 22),
-      title: Text(title, style: theme.bodyMedium),
-      trailing: Switch.adaptive(
-        value: value,
-        onChanged: onChanged,
-        activeTrackColor: theme.primary.withValues(alpha: 0.5),
-        activeThumbColor: theme.primary,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
     );
   }
 
@@ -230,18 +148,30 @@ class ProfileScreen extends ConsumerWidget {
           padding: EdgeInsets.all(theme.spacingLG),
           decoration: BoxDecoration(
             color: theme.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(theme.radiusXL)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(theme.radiusXL),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.textHint.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.textHint.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               SizedBox(height: theme.spacingLG),
-              Text('Account Information', style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Account Information',
+                style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: theme.spacingXL),
-              _buildInfoRow(theme, 'Name', user?.displayName ?? 'Not set'),
-              _buildInfoRow(theme, 'Email', user?.email ?? 'Not set'),
-              _buildInfoRow(theme, 'User ID', user?.uid ?? 'Unknown'),
+              _InfoRow(theme: theme, label: 'Name', value: user?.displayName ?? 'Not set'),
+              _InfoRow(theme: theme, label: 'Email', value: user?.email ?? 'Not set'),
+              _InfoRow(theme: theme, label: 'User ID', value: user?.uid ?? 'Unknown'),
               SizedBox(height: theme.spacingXL),
               ElevatedButton.icon(
                 onPressed: () {
@@ -259,7 +189,9 @@ class ProfileScreen extends ConsumerWidget {
                   backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -269,7 +201,9 @@ class ProfileScreen extends ConsumerWidget {
                   minimumSize: const Size(double.infinity, 50),
                   side: BorderSide(color: theme.primary.withValues(alpha: 0.5)),
                   foregroundColor: theme.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                 ),
                 child: const Text('Close'),
               ),
@@ -281,7 +215,77 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(AppThemeExtension theme, String label, String value) {
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final currentLang = ref.watch(settingsProviderProvider).language;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _LanguageOption(context: context, ref: ref, name: 'English', code: 'en', isSelected: currentLang == 'en'),
+            _LanguageOption(context: context, ref: ref, name: 'Spanish', code: 'es', isSelected: currentLang == 'es'),
+            _LanguageOption(context: context, ref: ref, name: 'French', code: 'fr', isSelected: currentLang == 'fr'),
+            _LanguageOption(context: context, ref: ref, name: 'Hindi', code: 'hi', isSelected: currentLang == 'hi'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmallStatCard extends StatelessWidget {
+  final AppThemeExtension theme;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _SmallStatCard({
+    required this.theme,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.surface.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(theme.radiusMD),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: theme.titleLarge.copyWith(color: color, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: theme.labelSmall.copyWith(color: theme.textSecondary)),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final AppThemeExtension theme;
+  final String label;
+  final String value;
+
+  const _InfoRow({required this.theme, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -293,31 +297,25 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
-    final currentLang = ref.watch(settingsProviderProvider).language;
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption(context, ref, 'English', 'en', currentLang == 'en'),
-            _buildLanguageOption(context, ref, 'Spanish', 'es', currentLang == 'es'),
-            _buildLanguageOption(context, ref, 'French', 'fr', currentLang == 'fr'),
-            _buildLanguageOption(context, ref, 'Hindi', 'hi', currentLang == 'hi'),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        ],
-      ),
-    );
-  }
+class _LanguageOption extends StatelessWidget {
+  final BuildContext context;
+  final WidgetRef ref;
+  final String name;
+  final String code;
+  final bool isSelected;
 
-  Widget _buildLanguageOption(BuildContext context, WidgetRef ref, String name, String code, bool isSelected) {
+  const _LanguageOption({
+    required this.context,
+    required this.ref,
+    required this.name,
+    required this.code,
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context).appTheme;
     return ListTile(
       title: Text(name),
@@ -326,6 +324,32 @@ class ProfileScreen extends ConsumerWidget {
         ref.read(settingsProviderProvider.notifier).setLanguage(code);
         Navigator.pop(context);
       },
+    );
+  }
+}
+
+class _LogoutButton extends StatelessWidget {
+  final AppThemeExtension theme;
+  final VoidCallback onPressed;
+
+  const _LogoutButton({required this.theme, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(Icons.logout, color: theme.error),
+      label: Text(
+        'Sign Out',
+        style: theme.bodyLarge.copyWith(color: theme.error, fontWeight: FontWeight.bold),
+      ),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+        backgroundColor: theme.error.withValues(alpha: 0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(theme.radiusMD),
+        ),
+      ),
     );
   }
 }

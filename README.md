@@ -5,6 +5,7 @@
 [<img src="https://img.shields.io/badge/Riverpod-%2302569B.svg?style=flat&logo=riverpod&logoColor=white" height="25">](https://riverpod.dev)
 [<img src="https://img.shields.io/badge/Hive-%23FDC210.svg?style=flat&logo=hive&logoColor=black" height="25">](https://pub.dev/packages/hive)
 [<img src="https://img.shields.io/badge/Firebase-%23039BE5.svg?style=flat&logo=firebase" height="25">](https://firebase.google.com)
+[<img src="https://img.shields.io/badge/GoRouter-%2302569B.svg?style=flat&logo=flutter&logoColor=white" height="25">](https://pub.dev/packages/go_router)
 
 Taskmaster is a high-fidelity productivity suite developed with Flutter, designed to provide a sophisticated balance of task management, calendar coordination, and productivity analytics.
  The application adheres to a premium design philosophy, utilizing modern UI techniques to deliver an immersive "Ambient" user experience.
@@ -16,7 +17,7 @@ The application is engineered for users who require a reliable and visually refi
 ## Principal Features
 
 ### Ambient Design System
-Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features theme-aware ambient backgrounds that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
+Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features theme-aware ambient backgrounds and custom splash/login experiences that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
 
 ### Hybrid Synchronization Engine
 The system utilizes a sophisticated dual-layered persistence and isolation strategy:
@@ -30,7 +31,7 @@ Users can now maintain their identity directly within the application. The new p
 The calendar module offers a unified view of time-sensitive events, categorized by professional and personal domains. It features real-time synchronization, ensuring that schedules are always current across all logged-in instances.
 
 ### Intelligence Dashboard (Landing Page)
-The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns and immediate access to pressing deadlines.
+The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns, immediate access to pressing deadlines, and direct navigation to your profile via the interactive user header.
 
 ## Technical Implementation
 

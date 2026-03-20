@@ -99,10 +99,10 @@ Directory Structure:
 -------------------------
 
 A. Splash Screen
-A cinematic entry point that handles the initialization of the application and displays the Taskmaster branding for a premium first impression.
+A cinematic entry point that handles the initialization of the application and displays the Taskmaster branding for a premium first impression. Now features theme-aware background images (`splash_bg_light.png` and `splash_bg_dark.png`) for a cohesive launch experience.
 
 B. Login Screen
-A clean, center-aligned branding page that supports secure authentication via Firebase.
+A clean, center-aligned branding page that supports secure authentication via Firebase. The screen utilizes dynamic background assets that adjust based on the current system theme.
 
 C. Tasks Screen
 The secondary hub for productivity, focusing on granular task interactions.
@@ -125,6 +125,8 @@ The primary landing experience and analytics hub.
 - Personalized Greeting: Displays "Welcome, [User Name]" dynamically based on the logged-in user.
 - Completion Metrics: High-fidelity visualizations (charts) of your task and event productivity.
 - Immediate Actions: View and toggle urgent upcoming tasks directly from the dashboard.
+- Direct Navigation: Tapping the user's name or avatar in the header now redirects instantly to the Profile screen.
+- Refined Layout: Optimized vertical spacing for a more compact and balanced aesthetic.
 
 F. Profile & Settings Screen
 Manage your identity and application environment.
