@@ -120,4 +120,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: v 1.6.0
+Project Version: 1.6.0
