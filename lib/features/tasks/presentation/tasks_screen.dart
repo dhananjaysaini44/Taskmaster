@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../auth/presentation/auth_provider.dart';
+import '../../../shared/widgets/glass_app_bar.dart';
 import '../domain/task_model.dart';
+import '../domain/task_filter.dart';
 import 'tasks_provider.dart';
 import 'widgets/task_card.dart';
 import 'widgets/add_task_modal.dart';
@@ -16,27 +16,11 @@ class TasksScreen extends ConsumerWidget {
     final theme = Theme.of(context).appTheme;
     final tasksAsync = ref.watch(tasksProviderProvider);
     final filter = ref.watch(tasksFilterProvider);
-    final authState = ref.watch(authProvider).valueOrNull;
-    final user = authState?.maybeWhen(
-      authenticated: (user) => user,
-      orElse: () => null,
-    );
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        title: _TasksAppBarTitle(user: user, theme: theme),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-            tooltip: 'Settings',
-          ),
-          const SizedBox(width: 8),
-        ],
+      appBar: const GlassAppBar(
+        title: Text('Tasks'),
       ),
       body: Column(
         children: [
@@ -67,47 +51,13 @@ class TasksScreen extends ConsumerWidget {
         return tasks.where((t) => !t.isCompleted).toList();
       case TaskFilter.completed:
         return tasks.where((t) => t.isCompleted).toList();
-      case TaskFilter.all:
+      default:
         return tasks;
     }
   }
 }
 
-class _TasksAppBarTitle extends StatelessWidget {
-  final dynamic user;
-  final AppThemeExtension theme;
-  const _TasksAppBarTitle({required this.user, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: theme.primary.withValues(alpha: 0.2),
-          backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-          child: user?.photoURL == null ? Icon(Icons.person, size: 20, color: theme.primary) : null,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome',
-                style: theme.labelSmall.copyWith(color: theme.textSecondary),
-              ),
-              Text(
-                user?.displayName ?? 'User',
-                style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
+// _TasksAppBarTitle removed as it moved to HomeScreen
 
 class _TaskFilterChips extends ConsumerWidget {
   const _TaskFilterChips();

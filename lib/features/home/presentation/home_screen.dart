@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../shared/widgets/glass_app_bar.dart';
 import '../../tasks/presentation/tasks_provider.dart';
@@ -8,19 +9,34 @@ import '../../tasks/domain/task_model.dart';
 import 'package:intl/intl.dart';
 import '../../tasks/presentation/widgets/add_task_modal.dart';
 
-class StatsScreen extends ConsumerWidget {
-  const StatsScreen({super.key});
+import '../../auth/presentation/auth_provider.dart';
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context).appTheme;
+    final authState = ref.watch(authProvider).valueOrNull;
+    final user = authState?.maybeWhen(
+      authenticated: (user) => user,
+      orElse: () => null,
+    );
     final tasksAsync = ref.watch(tasksProviderProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: const GlassAppBar(
-        title: Text('Task Analytics'),
+      appBar: GlassAppBar(
+        title: _HomeAppBarTitle(user: user, theme: theme),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+            tooltip: 'Settings',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: tasksAsync.when(
         data: (tasks) => _buildBody(context, ref, theme, tasks),
@@ -181,6 +197,42 @@ class StatsScreen extends ConsumerWidget {
                 theme: theme,
                 onToggle: () => ref.read(tasksProviderProvider.notifier).toggleComplete(task),
               )),
+      ],
+    );
+  }
+}
+
+class _HomeAppBarTitle extends StatelessWidget {
+  final dynamic user;
+  final AppThemeExtension theme;
+  const _HomeAppBarTitle({required this.user, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: theme.primary.withValues(alpha: 0.2),
+          backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+          child: user?.photoURL == null ? Icon(Icons.person, size: 20, color: theme.primary) : null,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome',
+                style: theme.labelSmall.copyWith(color: theme.textSecondary),
+              ),
+              Text(
+                user?.displayName ?? 'User',
+                style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

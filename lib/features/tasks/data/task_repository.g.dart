@@ -6,11 +6,12 @@ part of 'task_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$taskRepositoryHash() => r'9f8569394d3f443e865caed892d8c6bbae86f3a9';
+String _$taskRepositoryHash() => r'c976aed3d0f20a5e4ae145a824808172f6aa38ea';
 
 /// See also [taskRepository].
 @ProviderFor(taskRepository)
-final taskRepositoryProvider = Provider<TaskRepository>.internal(
+final taskRepositoryProvider =
+    AutoDisposeFutureProvider<TaskRepository>.internal(
   taskRepository,
   name: r'taskRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -20,6 +21,6 @@ final taskRepositoryProvider = Provider<TaskRepository>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef TaskRepositoryRef = ProviderRef<TaskRepository>;
+typedef TaskRepositoryRef = AutoDisposeFutureProviderRef<TaskRepository>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

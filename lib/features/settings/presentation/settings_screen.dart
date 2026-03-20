@@ -160,7 +160,7 @@ class SettingsScreen extends ConsumerWidget {
           FutureBuilder<String>(
             future: SystemInfo.getAppVersion(),
             builder: (context, snapshot) {
-              final version = snapshot.data?.split('+').first ?? '1.5.0';
+              final version = snapshot.data?.split('+').first ?? '1.6.0';
               return _buildInfoRow(theme, 'Version', version);
             },
           ),

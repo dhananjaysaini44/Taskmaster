@@ -11,7 +11,7 @@ import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
-import '../../features/stats/presentation/stats_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../shared/widgets/main_app_shell.dart';
 
@@ -104,6 +104,13 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: '/',
             pageBuilder: (context, state) => FadeTransitionPage(
+              child: const HomeScreen(),
+              key: state.pageKey,
+            ),
+          ),
+          GoRoute(
+            path: '/tasks',
+            pageBuilder: (context, state) => FadeTransitionPage(
               child: const TasksScreen(),
               key: state.pageKey,
             ),
@@ -115,13 +122,7 @@ GoRouter appRouter(AppRouterRef ref) {
               key: state.pageKey,
             ),
           ),
-          GoRoute(
-            path: '/stats',
-            pageBuilder: (context, state) => FadeTransitionPage(
-              child: const StatsScreen(),
-              key: state.pageKey,
-            ),
-          ),
+// /stats removed, replaced by / (Home) and /tasks
           GoRoute(
             path: '/profile',
             pageBuilder: (context, state) => FadeTransitionPage(

@@ -6,6 +6,7 @@ import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../tasks/presentation/tasks_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
+import './widgets/edit_profile_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -242,12 +243,32 @@ class ProfileScreen extends ConsumerWidget {
               _buildInfoRow(theme, 'Email', user?.email ?? 'Not set'),
               _buildInfoRow(theme, 'User ID', user?.uid ?? 'Unknown'),
               SizedBox(height: theme.spacingXL),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => EditProfileDialog(
+                      currentName: user?.displayName ?? '',
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  side: BorderSide(color: theme.primary.withValues(alpha: 0.5)),
+                  foregroundColor: theme.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
                 ),
                 child: const Text('Close'),

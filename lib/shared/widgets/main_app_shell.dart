@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
-import '../../features/stats/presentation/stats_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import 'ambient_background.dart';
 
@@ -20,8 +20,8 @@ class _MainAppShellState extends State<MainAppShell> {
 
   final List<String> _routes = [
     '/',
+    '/tasks',
     '/calendar',
-    '/stats',
     '/profile',
   ];
 
@@ -74,9 +74,9 @@ class _MainAppShellState extends State<MainAppShell> {
                 }
               },
               children: const [
+                HomeScreen(),
                 TasksScreen(),
                 CalendarScreen(),
-                StatsScreen(),
                 ProfileScreen(),
               ],
             )
@@ -92,19 +92,22 @@ class _MainAppShellState extends State<MainAppShell> {
         },
         items: const [
           BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.task_alt),
             label: 'Tasks',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],

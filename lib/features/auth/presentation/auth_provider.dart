@@ -67,4 +67,18 @@ class Auth extends _$Auth {
     // This doesn't change the auth state, so we just perform the action
     await ref.read(authRepositoryProvider).resetPassword(email);
   }
+
+  Future<void> updateDisplayName(String name) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).updateDisplayName(name);
+      return state.value ?? const AuthState.unauthenticated();
+    });
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    // Password update doesn't typically change the AuthState user object immediately in a way we track here
+    // but it's an auth operation.
+    await ref.read(authRepositoryProvider).updatePassword(newPassword);
+  }
 }

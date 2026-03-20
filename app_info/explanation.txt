@@ -26,7 +26,7 @@ The project follows a Feature-First Layered Architecture, which organizes code b
 
 Directory Structure:
 - /lib/core: Global configurations like the theme and routing.
-- /lib/features: Individual modules (auth, tasks, calendar, stats, profile).
+- /lib/features: Individual modules (auth, tasks, calendar, home, profile).
 - /lib/shared: Reusable UI components used across multiple features.
 
 3. DETAILED DIRECTORY & FILE STRUCTURE
@@ -77,8 +77,8 @@ Directory Structure:
 │   │   ├── presentation/calendar_screen.dart: The Calendar UI with schedule view.
 │   │   └── presentation/events_provider.dart: State & persistence logic for events, synchronized with Firestore.
 │   │
-│   ├── stats/ (Productivity Analytics)
-│   │   └── presentation/stats_screen.dart: The dashboard for tracking completion metrics across devices.
+│   ├── home/ (Productivity Analytics)
+│   │   └── presentation/home_screen.dart: The dashboard for tracking completion metrics across devices.
 │   │
 │   ├── profile/ (Settings & Identity)
 │   │   └── presentation/profile_screen.dart: Manage user details and app configuration.
@@ -104,12 +104,11 @@ A cinematic entry point that handles the initialization of the application and d
 B. Login Screen
 A clean, center-aligned branding page that supports secure authentication via Firebase.
 
-C. Tasks Screen (Main Dashboard)
-The primary hub for productivity.
-- Personalized Greeting: Displays "Welcome, [User Name]" dynamically based on the logged-in user.
+C. Tasks Screen
+The secondary hub for productivity, focusing on granular task interactions.
 - Filtering: View "All", "Upcoming", or "Completed" tasks.
 - Interaction: 
-  * Tap to Edit a task.
+  * Tap to Edit a task details.
   * Check the circular box to mark as complete.
   * Long-press to delete (with confirmation).
 - Organization: Drag and drop tasks using the explicit reorder handles on the right. Changes are synced instantly to the cloud.
@@ -121,15 +120,17 @@ A visual schedule of your commitments.
 - Custom Styles: Choose from categories like Work, Gym, or Personal with distinct accent colors.
 - Cloud Sync: All events are backed up to Firestore, ensuring your schedule is safe across devices.
 
-E. Stats Screen
-A dynamic dashboard for tracking progress.
-- Completion Metrics: Real-time calculation of your task and event productivity.
-- Interactive Deadlines: View and toggle upcoming tasks directly from the statistics view.
+E. Home Screen (Intelligence Dashboard)
+The primary landing experience and analytics hub.
+- Personalized Greeting: Displays "Welcome, [User Name]" dynamically based on the logged-in user.
+- Completion Metrics: High-fidelity visualizations (charts) of your task and event productivity.
+- Immediate Actions: View and toggle urgent upcoming tasks directly from the dashboard.
 
 F. Profile & Settings Screen
-Manage your identity and preferences.
-- User Profile: Displays your name and email synchronized from your Firebase account.
-- Theme Toggling: Switch between Light and Dark mode with a seamless "Ambient Background" transition.
+Manage your identity and application environment.
+- Identity Management: The new Profile Suite allows users to update their Display Name and secure their account with Password modifications.
+- Sync Status: Provides transparency on the synchronization state between the local vault and the cloud.
+- Interface Customization: Switch between Light and Dark mode with a seamless "Ambient Background" transition and language selection.
 
 5. IMPORTANT CODE SNIPPETS & PATTERNS
 
@@ -167,15 +168,16 @@ Future<void> addTask(TaskModel task) async {
 *How it works*: Imagine the app has a local "Notebook" (Hive) that it writes in immediately so you don't have to wait. At the same time, it sends a copy to a "Cloud Safe" (Firestore). If you get a new phone, the app just downloads everything from your "Cloud Safe" back into a new local "Notebook."
 
 D. Data Isolation & Privacy (Your Private Vault)
-The application is designed to be safe for use even on shared devices. We use a "Vault System" to keep every user's data completely separate.
+The application implements a strict "Private Vault" architecture to ensure data integrity and confidentiality, especially on shared devices.
 
-*   **Local Vaults (Hive)**: On your phone or computer, your tasks and events are stored in a unique "box" that is named after your unique account ID. When you log out, the app immediately "locks and clears" its memory of your data so the next person cannot see it.
-*   **Cloud Folders (Firestore)**: In the cloud, your data is stored in a private folder that only your account has permission to read or write to.
+*   **UID-Prefixed Local Vaults (Hive)**: The application dynamically initializes storage based on the user's unique Firebase ID (`UID`). Every user's data is stored in a separate, encrypted-ready Hive box (e.g., `tasks_{uid}`). This ensures that even if another user logs in on the same device, they have zero access to the previous user's local data.
+*   **Logout Sanitization**: Upon logout, the application performs a complete "Memory Flush," closing all user-specific boxes and resetting providers to their initial, empty states.
+*   **Cloud Folders (Firestore)**: In the cloud, data is segmented into `users/{UID}` sub-collections. Firebase Security Rules restrict access so that only the owner of the UID can read or write to their corresponding "folder."
 
-*Simple Explanation*: Even if two people use the same Taskmaster app on the same phone, their tasks will never get mixed up. It's like having two different locked drawers in the same desk.
+*Simple Explanation*: Taskmaster treats your data like a safety deposit box. Your key (Login) only opens your box. Even in the same "bank" (App), everyone has their own locked compartment that no one else can touch.
 
 C. Premium UI (Ambient Background)
-The app uses a custom `AmbientBackground` widget that blends gradients and theme-aware images behind the content.
+The app uses a custom `AmbientBackground` widget that blends gradients and theme-aware images behind the content, creating a cohesive, immersive experience.
 ```dart
 class AmbientBackground extends StatelessWidget {
   final Widget child;
@@ -192,6 +194,6 @@ To run the project locally:
 4. Launch via `flutter run`.
 
 ---
-Current Project State: Ver 1.6.0 - Enhanced Data Privacy & Security Release
+Current Project State: v 1.6.0 - Advanced Profile Management & Data Privacy Release
 Documentation maintained by the Taskmaster Engineering Team.
 Dhananjay Saini (GitHub: @dhananjaysaini44)

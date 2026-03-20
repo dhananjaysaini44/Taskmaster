@@ -97,6 +97,30 @@ class AuthRepository {
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
   }
+
+  Future<void> updateDisplayName(String name) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    await Future.wait([
+      user.updateDisplayName(name),
+      _firestore.collection('users').doc(user.uid).update({'displayName': name}),
+    ]);
+
+    // Force refresh of current user object
+    final updatedAppUser = _currentUser?.copyWith(displayName: name);
+    if (updatedAppUser != null) {
+      _currentUser = updatedAppUser;
+      _authBox.put('currentUser', _currentUser);
+      _controller.add(_currentUser);
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+    await user.updatePassword(newPassword);
+  }
 }
 
 @Riverpod(keepAlive: true)

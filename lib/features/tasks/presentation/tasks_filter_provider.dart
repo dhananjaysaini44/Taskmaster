@@ -1,8 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../domain/task_filter.dart';
 
 part 'tasks_filter_provider.g.dart';
-
-enum TaskFilter { all, upcoming, completed }
 
 @riverpod
 class TasksFilter extends _$TasksFilter {

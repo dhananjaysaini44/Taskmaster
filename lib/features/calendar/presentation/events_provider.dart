@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../domain/models/calendar_event_model.dart';
 
+import '../../auth/presentation/user_id_provider.dart';
+
 part 'events_provider.g.dart';
 
 @riverpod
@@ -16,32 +18,35 @@ class EventsProvider extends _$EventsProvider {
 
   @override
   AsyncValue<List<CalendarEventModel>> build() {
-    final user = _auth.currentUser;
-    if (user == null) {
+    final uid = ref.watch(userIdProvider);
+    if (uid == null) {
       return const AsyncValue.data([]);
     }
 
-    _openBox(user.uid).then((_) {
-      final localEvents = _loadEvents();
-      state = AsyncValue.data(localEvents);
-      
-      // Trigger async sync in the background
-      _syncWithCloud(user.uid, localEvents).then((cloudEvents) {
-        state = AsyncValue.data(cloudEvents);
-      });
-    });
+    _initialize(uid);
     
     return const AsyncValue.loading();
   }
 
-  Future<void> _openBox(String uid) async {
+  Future<void> _initialize(String uid) async {
     final boxName = 'events_$uid';
-    if (!Hive.isBoxOpen(boxName)) {
-      _box = await Hive.openBox(boxName);
-    } else {
-      _box = Hive.box(boxName);
+    _box = await Hive.openBox(boxName);
+    
+    // Ensure we are still matching the uid after async box opening
+    if (ref.read(userIdProvider) != uid) return;
+    
+    final localEvents = _loadEvents();
+    state = AsyncValue.data(localEvents);
+    
+    // Trigger async sync in the background
+    final cloudEvents = await _syncWithCloud(uid, localEvents);
+    
+    // CRITICAL: Only apply if user is still the same
+    if (ref.read(userIdProvider) == uid) {
+       state = AsyncValue.data(cloudEvents);
     }
   }
+
 
   Future<List<CalendarEventModel>> _syncWithCloud(String uid, List<CalendarEventModel> localEvents) async {
     try {

@@ -1,63 +1,40 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../domain/task_model.dart';
+
+import '../../auth/presentation/user_id_provider.dart';
 
 part 'task_repository.g.dart';
 
 class TaskRepository {
+  final String uid;
+  final Box _box;
   final List<TaskModel> _tasks = [];
   final _controller = StreamController<List<TaskModel>>.broadcast();
-  Box? _box;
   final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-  StreamSubscription? _userSubscription;
 
-  TaskRepository() {
-    _setupAuthListener();
-    _initForCurrentUser();
+  TaskRepository({required this.uid, required this._box}) {
+    _loadTasks();
+    _syncWithCloud();
   }
 
-  Future<void> _initForCurrentUser() async {
-    _clearState();
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _openBox(user.uid);
-      _loadTasks();
-      _syncWithCloud(user.uid);
-    }
-  }
-
-  void _clearState() {
-    _tasks.clear();
-    _box = null;
-    _controller.add([]);
-  }
-
-  Future<void> _openBox(String uid) async {
-    final boxName = 'tasks_$uid';
-    if (!Hive.isBoxOpen(boxName)) {
-      _box = await Hive.openBox(boxName);
-    } else {
-      _box = Hive.box(boxName);
-    }
-  }
-
-  void _setupAuthListener() {
-    _userSubscription = _auth.authStateChanges().listen((user) async {
-      _clearState();
-      if (user != null) {
-        await _openBox(user.uid);
-        _loadTasks();
-        _syncWithCloud(user.uid);
+  void _loadTasks() {
+    final List<dynamic>? data = _box.get('items');
+    if (data != null) {
+      _tasks.clear();
+      for (final item in data) {
+        try {
+          _tasks.add(TaskModel.fromJson(Map<String, dynamic>.from(item as Map)));
+        } catch (e) {
+          // Skip invalid entries
+        }
       }
-    });
+    }
   }
 
-  Future<void> _syncWithCloud(String uid) async {
+  Future<void> _syncWithCloud() async {
     try {
       final snapshot = await _firestore
           .collection('users')
@@ -71,7 +48,8 @@ class TaskRepository {
             .map((doc) => TaskModel.fromJson(doc.data()))
             .toList();
         
-        // Simple merge: cloud wins for now if there are any
+        // No need for activeUid check here anymore because this instance
+        // is dedicated to this uid and will be disposed if the user switches.
         _tasks.clear();
         _tasks.addAll(cloudTasks);
         await _saveTasksLocal();
@@ -94,65 +72,39 @@ class TaskRepository {
     }
   }
 
-  void _loadTasks() {
-    if (_box == null) return;
-    final List<dynamic>? data = _box!.get('items');
-    if (data != null) {
-      _tasks.clear();
-      for (final item in data) {
-        try {
-          _tasks.add(TaskModel.fromJson(Map<String, dynamic>.from(item as Map)));
-        } catch (e) {
-          // Skip invalid entries
-        }
-      }
-    }
-  }
-
   Future<void> _saveTasksLocal() async {
-    if (_box == null) return;
-    await _box!.put('items', _tasks.map((t) => t.toJson()).toList());
+    await _box.put('items', _tasks.map((t) => t.toJson()).toList());
   }
 
   Future<void> _saveTaskToCloud(TaskModel task) async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('tasks')
-          .doc(task.id)
-          .set(task.toJson());
-    }
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('tasks')
+        .doc(task.id)
+        .set(task.toJson());
   }
 
   Future<void> _deleteTaskFromCloud(String id) async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('tasks')
-          .doc(id)
-          .delete();
-    }
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('tasks')
+        .doc(id)
+        .delete();
   }
 
   Future<void> _saveAllTasksToCloud() async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      final batch = _firestore.batch();
-      // First clear existing? Or just overwrite. Overwrite is safer for maps.
-      for (final task in _tasks) {
-        final docRef = _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('tasks')
-            .doc(task.id);
-        batch.set(docRef, task.toJson());
-      }
-      await batch.commit();
+    final batch = _firestore.batch();
+    for (final task in _tasks) {
+      final docRef = _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('tasks')
+          .doc(task.id);
+      batch.set(docRef, task.toJson());
     }
+    await batch.commit();
   }
 
   Stream<List<TaskModel>> watchTasks() async* {
@@ -224,13 +176,28 @@ class TaskRepository {
   }
 
   void dispose() {
-    _userSubscription?.cancel();
     _controller.close();
   }
 }
 
 
-@Riverpod(keepAlive: true)
-TaskRepository taskRepository(Ref ref) {
-  return TaskRepository();
+@riverpod
+Future<TaskRepository> taskRepository(TaskRepositoryRef ref) async {
+  final uid = ref.watch(userIdProvider);
+  if (uid == null) {
+    throw Exception('User must be authenticated to access TaskRepository');
+  }
+  
+  final boxName = 'tasks_$uid';
+  final box = await Hive.openBox(boxName);
+  
+  final repo = TaskRepository(uid: uid, box: box);
+  
+  ref.onDispose(() {
+    repo.dispose();
+    // Not closing the box here to avoid issues if other things are using it,
+    // but Hive balances open/close calls.
+  });
+  
+  return repo;
 }

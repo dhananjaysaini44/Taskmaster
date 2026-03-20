@@ -23,20 +23,14 @@ The system utilizes a sophisticated dual-layered persistence and isolation strat
 - **Local Persistence & Isolation**: Powered by Hive, ensuring near-zero latency. Data is partitioned into user-specific encrypted vaults (UID-prefixed boxes), ensuring strict multitenancy even on shared hardware.
 - **Cloud Synchronization**: Integrated with Firebase Firestore to provide real-time data redundancy, secure cross-platform synchronization, and a secondary layer of data isolation.
 
-### Personalized User Interface
-The application features a personalized greeting system and profile management, ensuring that user identity is integrated throughout the productivity flow.
-
-### Task Lifecycle Management
-A comprehensive suite of task management tools is provided, including:
-- Multi-dimensional status filtering.
-- High-fidelity drag-and-drop reordering for intuitive prioritization.
-- Context-aware editing and deletion workflows.
+### Secure Profile Management
+Users can now maintain their identity directly within the application. The new profile suite allows for real-time updates to display names and secure password modifications, with all changes instantly synchronized to the Firebase cloud and across all active sessions.
 
 ### Integrated Scheduling
 The calendar module offers a unified view of time-sensitive events, categorized by professional and personal domains. It features real-time synchronization, ensuring that schedules are always current across all logged-in instances.
 
-### Productivity Analytics
-Dynamic dashboards visualize completion metrics and performance trends, providing users with actionable insights into their productivity patterns.
+### Intelligence Dashboard (Landing Page)
+The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns and immediate access to pressing deadlines.
 
 ## Technical Implementation
 
@@ -79,7 +73,7 @@ taskmaster/
 │   │   ├── calendar/   # Event scheduling and management
 │   │   ├── profile/    # User identity and profile settings
 │   │   ├── settings/   # Theme and application configuration
-│   │   ├── stats/      # Productivity analytics dashboard
+│   │   ├── home/       # Productivity analytics dashboard
 │   │   └── tasks/      # Core task management (CRUD, Reorder)
 │   ├── shared/         # Reusable widgets and UI components
 │   │   └── widgets/
@@ -126,4 +120,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: 1.6.0
+Project Version: v 1.6.0

@@ -33,6 +33,20 @@ class AppUser extends HiveObject {
     };
   }
 
+  AppUser copyWith({
+    String? uid,
+    String? email,
+    String? displayName,
+    String? photoURL,
+  }) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      photoURL: photoURL ?? this.photoURL,
+    );
+  }
+
   factory AppUser.fromMap(Map<String, dynamic> map) {
     return AppUser(
       uid: map['uid'] as String,
