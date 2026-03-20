@@ -60,11 +60,13 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Theme.of(context).appTheme.primary,
+              brightness: Theme.of(context).brightness,
+              surface: Theme.of(context).appTheme.surface,
+              onSurface: Theme.of(context).appTheme.textPrimary,
               primary: Theme.of(context).appTheme.primary,
               onPrimary: Colors.white,
-              surface: Theme.of(context).appTheme.surface,
-              onSurface: Colors.white,
             ),
           ),
           child: child!,
@@ -135,7 +137,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                 color: theme.surface.withValues(alpha: 0.85),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: theme.borderSecondary,
                   width: 1.5,
                 ),
               ),
