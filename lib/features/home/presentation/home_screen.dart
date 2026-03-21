@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../../shared/widgets/glass_app_bar.dart';
 import '../../tasks/presentation/tasks_provider.dart';
 import '../../tasks/domain/task_model.dart';
+import '../../calendar/domain/models/calendar_event_model.dart';
+import '../../calendar/presentation/events_provider.dart';
 import '../../tasks/presentation/widgets/add_task_modal.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../domain/home_stats.dart';
-import './widgets/stat_card.dart';
-import './widgets/priority_distribution_chart.dart';
-import './widgets/overview_item.dart';
+import './widgets/greeting_widget.dart';
+import './widgets/task_completion_chart.dart';
+import './widgets/productivity_chart.dart';
 import './widgets/deadline_tile.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -18,7 +18,6 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Only context is needed for most builders now
     return const _HomeScreenContent();
   }
 }
@@ -35,25 +34,24 @@ class _HomeScreenContent extends ConsumerWidget {
       orElse: () => null,
     );
     final tasksAsync = ref.watch(tasksProviderProvider);
+    final eventsAsync = ref.watch(eventsProviderProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Required for ambient background
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(
-        title: _HomeAppBarTitle(user: user, theme: theme),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-            tooltip: 'Settings',
-          ),
-          SizedBox(width: theme.spacingSM),
-        ],
-      ),
       body: tasksAsync.when(
-        data: (tasks) => _HomeBody(tasks: tasks, theme: theme),
+        data: (tasks) => eventsAsync.when(
+          data: (events) => _HomeBody(
+            tasks: tasks,
+            events: events,
+            theme: theme,
+            user: user,
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Error loading events: $error')),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text('Error loading tasks: $error')),
       ),
     );
   }
@@ -61,43 +59,110 @@ class _HomeScreenContent extends ConsumerWidget {
 
 class _HomeBody extends ConsumerWidget {
   final List<TaskModel> tasks;
+  final List<CalendarEventModel> events;
   final AppThemeExtension theme;
+  final dynamic user;
 
-  const _HomeBody({required this.tasks, required this.theme});
+  const _HomeBody({
+    required this.tasks,
+    required this.events,
+    required this.theme,
+    required this.user,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = HomeStats.fromTasks(tasks);
-    final upcoming = tasks.where((t) => !t.isCompleted).toList()
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
-    final displayTasks = upcoming.take(3).toList();
+    final stats = HomeStats.calculate(tasks: tasks, events: events);
+
+    // Combine tasks and events into a single upcoming list
+    final upcomingTasks = tasks
+        .where((t) => t.status != TaskStatus.completed)
+        .map((task) => _DeadlineItem(
+              title: task.title,
+              subtext: task.notes,
+              date: task.dueDate,
+              statusColor: Color(task.colorValue),
+              isCompleted: false,
+              onToggle: () =>
+                  ref.read(tasksProviderProvider.notifier).updateStatus(
+                        task,
+                        TaskStatus.completed,
+                      ),
+            ));
+
+    final upcomingEvents = events
+        .where((e) => !e.isCompleted)
+        .map((event) => _DeadlineItem(
+              title: event.title,
+              subtext: event.category,
+              date: event.startTime,
+              statusColor: event.colorValue != null
+                  ? Color(event.colorValue!)
+                  : theme.secondary,
+              isCompleted: false,
+              onToggle: () {
+                ref
+                    .read(eventsProviderProvider.notifier)
+                    .toggleEventCompletion(event.id);
+              },
+            ));
+
+    final combinedUpcoming = [...upcomingTasks, ...upcomingEvents]
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    final displayItems = combinedUpcoming.take(10).toList();
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).padding.top +
-                kToolbarHeight,
-          ),
-          _SummaryCards(stats: stats, theme: theme),
-          SizedBox(height: theme.spacingXL),
-          PriorityDistributionChart(
+          SizedBox(height: theme.spacingSM * 2.2),
+          GreetingWidget(
+            userName: user?.displayName ?? 'User',
             theme: theme,
-            high: stats.highPriority,
-            medium: stats.mediumPriority,
-            low: stats.lowPriority,
           ),
-          SizedBox(height: theme.spacingXL),
-          _CompletionOverview(stats: stats, theme: theme),
-          SizedBox(height: theme.spacingXL),
+          SizedBox(height: theme.spacingMD),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 600;
+              final charts = [
+                SizedBox(
+                  height: 180,
+                  child: TaskCompletionChart(
+                    theme: theme,
+                    completed: stats.completedTasks,
+                    pending: stats.totalTasks - stats.completedTasks,
+                  ),
+                ),
+                SizedBox(height: theme.spacingMD),
+                SizedBox(
+                  height: 180,
+                  child: ProductivityChart(
+                    theme: theme,
+                    dailyCompletions: stats.dailyProductivity,
+                  ),
+                ),
+              ];
+
+              if (isWide) {
+                return Row(
+                  children: [
+                    Expanded(child: charts[0]),
+                    SizedBox(width: theme.spacingMD),
+                    Expanded(child: charts[2]), // items[1] is spacing
+                  ],
+                );
+              } else {
+                return Column(children: charts);
+              }
+            },
+          ),
+          SizedBox(height: theme.spacingMD),
           _UpcomingSection(
-            displayTasks: displayTasks,
+            displayItems: displayItems,
             theme: theme,
             onAddTask: () => _showAddTask(context),
-            onToggle: (task) =>
-                ref.read(tasksProviderProvider.notifier).toggleComplete(task),
           ),
           const SizedBox(height: 100),
         ],
@@ -115,99 +180,33 @@ class _HomeBody extends ConsumerWidget {
   }
 }
 
-class _SummaryCards extends StatelessWidget {
-  final HomeStats stats;
-  final AppThemeExtension theme;
+class _DeadlineItem {
+  final String title;
+  final String? subtext;
+  final DateTime date;
+  final Color statusColor;
+  final bool isCompleted;
+  final VoidCallback onToggle;
 
-  const _SummaryCards({required this.stats, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: StatCard(
-            title: 'Total Tasks',
-            value: stats.totalTasks.toString(),
-            icon: Icons.assignment_outlined,
-            color: theme.primary,
-            theme: theme,
-          ),
-        ),
-        SizedBox(width: theme.spacingMD),
-        Expanded(
-          child: StatCard(
-            title: 'Efficiency',
-            value: '${stats.efficiency}%',
-            icon: Icons.bolt_outlined,
-            color: theme.accent,
-            theme: theme,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CompletionOverview extends StatelessWidget {
-  final HomeStats stats;
-  final AppThemeExtension theme;
-
-  const _CompletionOverview({required this.stats, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    final pending = stats.totalTasks - stats.completedTasks;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Completion Overview',
-          style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: theme.spacingMD),
-        Container(
-          height: 150,
-          padding: EdgeInsets.all(theme.spacingLG),
-          decoration: BoxDecoration(
-            color: theme.surface.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(theme.radiusLG),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              OverviewItem(
-                label: 'Completed',
-                value: stats.completedTasks,
-                color: theme.accent,
-                theme: theme,
-              ),
-              OverviewItem(
-                label: 'Pending',
-                value: pending,
-                color: theme.textHint,
-                theme: theme,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  _DeadlineItem({
+    required this.title,
+    this.subtext,
+    required this.date,
+    required this.statusColor,
+    required this.isCompleted,
+    required this.onToggle,
+  });
 }
 
 class _UpcomingSection extends StatelessWidget {
-  final List<TaskModel> displayTasks;
+  final List<_DeadlineItem> displayItems;
   final AppThemeExtension theme;
   final VoidCallback onAddTask;
-  final Function(TaskModel) onToggle;
 
   const _UpcomingSection({
-    required this.displayTasks,
+    required this.displayItems,
     required this.theme,
     required this.onAddTask,
-    required this.onToggle,
   });
 
   @override
@@ -230,7 +229,7 @@ class _UpcomingSection extends StatelessWidget {
           ],
         ),
         SizedBox(height: theme.spacingSM),
-        if (displayTasks.isEmpty)
+        if (displayItems.isEmpty)
           Center(
             child: Padding(
               padding: EdgeInsets.all(theme.spacingXL),
@@ -241,54 +240,18 @@ class _UpcomingSection extends StatelessWidget {
             ),
           )
         else
-          ...displayTasks.map((task) => DeadlineTile(
-                task: task,
-                theme: theme,
-                onToggle: () => onToggle(task),
-              )),
-      ],
-    );
-  }
-}
-
-class _HomeAppBarTitle extends StatelessWidget {
-  final dynamic user;
-  final AppThemeExtension theme;
-  const _HomeAppBarTitle({required this.user, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => context.push('/profile'),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: theme.primary.withValues(alpha: 0.2),
-            backgroundImage:
-                user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-            child: user?.photoURL == null
-                ? Icon(Icons.person, size: 20, color: theme.primary)
-                : null,
-          ),
-          SizedBox(width: theme.spacingSM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome',
-                  style: theme.labelSmall.copyWith(color: theme.textSecondary),
-                ),
-                Text(
-                  user?.displayName ?? 'User',
-                  style: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
+          ...displayItems.map(
+            (item) => DeadlineTile(
+              title: item.title,
+              subtext: item.subtext,
+              date: item.date,
+              statusColor: item.statusColor,
+              isCompleted: item.isCompleted,
+              onToggle: item.onToggle,
+              theme: theme,
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }

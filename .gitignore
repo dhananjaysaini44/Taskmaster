@@ -54,3 +54,22 @@ macos/Runner/GoogleService-Info.plist
 *.jks
 key.properties
 .env*
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Android
+android/.gradle/
+android/local.properties
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Runner.xcworkspace/xcuserdata/
+
+# MacOS
+._*
+.Trashes

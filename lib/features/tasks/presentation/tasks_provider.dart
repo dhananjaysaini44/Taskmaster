@@ -21,6 +21,7 @@ class TasksProvider extends _$TasksProvider {
     required TaskPriority priority,
     required int colorValue,
     required DateTime dueDate,
+    String? notes,
   }) async {
     final repo = await ref.read(taskRepositoryProvider.future);
     await repo.addTask(
@@ -28,18 +29,23 @@ class TasksProvider extends _$TasksProvider {
       priority: priority,
       colorValue: colorValue,
       dueDate: dueDate,
+      notes: notes,
     );
   }
-
 
   Future<void> updateTask(TaskModel task) async {
     final repo = await ref.read(taskRepositoryProvider.future);
     await repo.updateTask(task);
   }
 
-  Future<void> toggleComplete(TaskModel task) async {
+  Future<void> updateStatus(TaskModel task, TaskStatus newStatus) async {
     final repo = await ref.read(taskRepositoryProvider.future);
-    await repo.toggleComplete(task.id, task.isCompleted);
+    await repo.updateStatus(task.id, newStatus);
+  }
+
+  Future<void> updateProgress(TaskModel task, double progress) async {
+    final repo = await ref.read(taskRepositoryProvider.future);
+    await repo.updateProgress(task.id, progress);
   }
 
   Future<void> deleteTask(String id) async {

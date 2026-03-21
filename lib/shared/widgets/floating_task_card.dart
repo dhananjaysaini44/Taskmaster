@@ -30,12 +30,7 @@ class FloatingTaskCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(theme.radiusMD),
-        border: Border(
-          left: BorderSide(
-            color: accentColor,
-            width: 6.0,
-          ),
-        ),
+        border: Border(left: BorderSide(color: accentColor, width: 6.0)),
       ),
       child: Padding(
         padding: EdgeInsets.all(theme.spacingMD),
@@ -45,7 +40,9 @@ class FloatingTaskCard extends StatelessWidget {
               onTap: onToggleCompletion,
               child: Icon(
                 isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                color: isCompleted ? accentColor : theme.labelSmall.color?.withValues(alpha: 0.6),
+                color: isCompleted
+                    ? accentColor
+                    : theme.labelSmall.color?.withValues(alpha: 0.6),
               ),
             ),
             SizedBox(width: theme.spacingSM),
@@ -56,7 +53,9 @@ class FloatingTaskCard extends StatelessWidget {
                   Text(
                     title,
                     style: theme.titleMedium.copyWith(
-                      decoration: isCompleted ? TextDecoration.lineThrough : null,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -79,7 +78,9 @@ class FloatingTaskCard extends StatelessWidget {
                       SizedBox(width: theme.spacingSM),
                       Text(
                         '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
-                        style: theme.labelSmall.copyWith(color: theme.labelSmall.color?.withValues(alpha: 0.6)),
+                        style: theme.labelSmall.copyWith(
+                          color: theme.labelSmall.color?.withValues(alpha: 0.6),
+                        ),
                       ),
                     ],
                   ),
@@ -87,7 +88,10 @@ class FloatingTaskCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline, color: theme.labelSmall.color?.withValues(alpha: 0.6)),
+              icon: Icon(
+                Icons.delete_outline,
+                color: theme.labelSmall.color?.withValues(alpha: 0.6),
+              ),
               onPressed: onDelete,
             ),
           ],

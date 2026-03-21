@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../core/utils/system_info.dart';
 import '../../../shared/widgets/color_picker_widget.dart';
-import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import 'settings_provider.dart';
 
@@ -23,17 +22,14 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.background,
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(
-        title: Text(
-          'Settings',
-          style: theme.displayLarge.copyWith(fontSize: 24),
-        ),
-      ),
       body: ListView(
         padding: EdgeInsets.only(
           left: theme.spacingLG,
           right: theme.spacingLG,
-          top: MediaQuery.of(context).padding.top + kToolbarHeight + theme.spacingMD,
+          top:
+              MediaQuery.of(context).padding.top +
+              kToolbarHeight +
+              theme.spacingMD,
           bottom: 100,
         ),
         children: [
@@ -94,7 +90,11 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildThemeSelector(AppThemeExtension theme, SettingsState state, SettingsProvider notifier) {
+  Widget _buildThemeSelector(
+    AppThemeExtension theme,
+    SettingsState state,
+    SettingsProvider notifier,
+  ) {
     return SegmentedButton<ThemeMode>(
       segments: const [
         ButtonSegment(
@@ -132,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
       osVersion = 'N/A (Web)';
     } else {
       // We can use dart:io classes safely here because kIsWeb is false
-      // But we need to be careful with imports. 
+      // But we need to be careful with imports.
       // Actually, it's better to use a helper or just kIsWeb check.
       try {
         osName = Platform.operatingSystem;
@@ -146,7 +146,11 @@ class SettingsScreen extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.radiusLG),
-        side: BorderSide(color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent),
+        side: BorderSide(
+          color:
+              theme.labelSmall.color?.withValues(alpha: 0.1) ??
+              Colors.transparent,
+        ),
       ),
       color: theme.surface,
       child: Column(
@@ -155,15 +159,13 @@ class SettingsScreen extends ConsumerWidget {
           _buildDivider(theme),
           _buildInfoRow(theme, 'OS Version', osVersion),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Screen Resolution', '${size.width.toInt()} x ${size.height.toInt()}'),
-          _buildDivider(theme),
-          FutureBuilder<String>(
-            future: SystemInfo.getAppVersion(),
-            builder: (context, snapshot) {
-              final version = snapshot.data?.split('+').first ?? '1.6.0';
-              return _buildInfoRow(theme, 'Version', version);
-            },
+          _buildInfoRow(
+            theme,
+            'Screen Resolution',
+            '${size.width.toInt()} x ${size.height.toInt()}',
           ),
+          _buildDivider(theme),
+          _buildInfoRow(theme, 'Version', '1.7.0'),
         ],
       ),
     );
@@ -171,11 +173,17 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildInfoRow(AppThemeExtension theme, String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: theme.spacingMD, vertical: theme.spacingMD),
+      padding: EdgeInsets.symmetric(
+        horizontal: theme.spacingMD,
+        vertical: theme.spacingMD,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.bodyMedium.copyWith(color: theme.labelSmall.color)),
+          Text(
+            label,
+            style: theme.bodyMedium.copyWith(color: theme.labelSmall.color),
+          ),
           Flexible(
             child: Text(
               value,
@@ -190,19 +198,33 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildDivider(AppThemeExtension theme) {
-    return Divider(height: 1, indent: theme.spacingMD, endIndent: theme.spacingMD, color: theme.labelSmall.color?.withValues(alpha: 0.05));
+    return Divider(
+      height: 1,
+      indent: theme.spacingMD,
+      endIndent: theme.spacingMD,
+      color: theme.labelSmall.color?.withValues(alpha: 0.05),
+    );
   }
 
-  Widget _buildAccountSection(BuildContext context, WidgetRef ref, AppThemeExtension theme) {
+  Widget _buildAccountSection(
+    BuildContext context,
+    WidgetRef ref,
+    AppThemeExtension theme,
+  ) {
     return Column(
       children: [
         ListTile(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(theme.radiusMD),
+          ),
           tileColor: theme.error.withValues(alpha: 0.05),
           leading: Icon(Icons.logout_rounded, color: theme.error),
           title: Text(
             'Sign Out',
-            style: theme.bodyMedium.copyWith(color: theme.error, fontWeight: FontWeight.bold),
+            style: theme.bodyMedium.copyWith(
+              color: theme.error,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           onTap: () async {
             await ref.read(authProvider.notifier).signOut();
@@ -224,7 +246,11 @@ class SettingsScreen extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.radiusLG),
-        side: BorderSide(color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent),
+        side: BorderSide(
+          color:
+              theme.labelSmall.color?.withValues(alpha: 0.1) ??
+              Colors.transparent,
+        ),
       ),
       color: theme.surface,
       child: ListTile(
@@ -249,7 +275,11 @@ class SettingsScreen extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.radiusLG),
-        side: BorderSide(color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent),
+        side: BorderSide(
+          color:
+              theme.labelSmall.color?.withValues(alpha: 0.1) ??
+              Colors.transparent,
+        ),
       ),
       color: theme.surface,
       child: ListTile(

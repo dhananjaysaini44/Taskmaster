@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import 'ambient_background.dart';
+import 'minimal_app_bar.dart';
+import 'app_drawer.dart';
+import '../../features/auth/presentation/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_theme_extension.dart';
 
-class MainAppShell extends StatefulWidget {
+class MainAppShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const MainAppShell({super.key, required this.child});
 
   @override
-  State<MainAppShell> createState() => _MainAppShellState();
+  ConsumerState<MainAppShell> createState() => _MainAppShellState();
 }
 
-class _MainAppShellState extends State<MainAppShell> {
+class _MainAppShellState extends ConsumerState<MainAppShell> {
   late PageController _pageController;
 
-  final List<String> _routes = [
-    '/',
-    '/tasks',
-    '/calendar',
-    '/profile',
-  ];
+  final List<String> _routes = ['/', '/tasks', '/calendar', '/profile'];
 
   @override
   void initState() {
@@ -46,14 +47,23 @@ class _MainAppShellState extends State<MainAppShell> {
     return _routes.contains(location);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).appTheme;
     final location = GoRouterState.of(context).uri.path;
     final currentIndex = _getCurrentIndex(location);
     final isMainRoute = _isMainRoute(location);
+    final authState = ref.watch(authProvider).valueOrNull;
+    final user = authState?.maybeWhen(
+      authenticated: (user) => user,
+      orElse: () => null,
+    );
 
     // Sync PageController with location if it changes externally
-    if (_pageController.hasClients && _pageController.page?.round() != currentIndex) {
+    if (_pageController.hasClients &&
+        _pageController.page?.round() != currentIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_pageController.hasClients) {
           _pageController.jumpToPage(currentIndex);
@@ -62,6 +72,53 @@ class _MainAppShellState extends State<MainAppShell> {
     }
 
     return Scaffold(
+      drawer: const AppDrawer(),
+      appBar: MinimalAppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            tooltip: 'Menu',
+          ),
+        ),
+        title: Text(
+          'Taskmaster',
+          style: GoogleFonts.goldman(
+            textStyle: theme.titleLarge.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.primary,
+            ),
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => context.push('/profile'),
+            icon: CircleAvatar(
+              radius: 16,
+              backgroundColor: theme.primary.withValues(alpha: 0.2),
+              backgroundImage: (user != null && user.photoURL != null && user.photoURL!.isNotEmpty)
+                  ? NetworkImage(user.photoURL!)
+                  : null,
+              child: (user?.photoURL == null || user!.photoURL!.isEmpty)
+                  ? Text(
+                      user?.displayName?.isNotEmpty == true
+                          ? user!.displayName![0].toUpperCase()
+                          : user?.email?.isNotEmpty == true
+                              ? user!.email![0].toUpperCase()
+                              : '?',
+                      style: TextStyle(
+                        color: theme.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+            ),
+            tooltip: 'Profile',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Stack(
         children: [
           const AmbientBackground(),
@@ -87,6 +144,8 @@ class _MainAppShellState extends State<MainAppShell> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         onTap: (index) {
           context.go(_routes[index]);
         },
@@ -96,10 +155,7 @@ class _MainAppShellState extends State<MainAppShell> {
             activeIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.task_alt),
-            label: 'Tasks',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.task_alt), label: 'Tasks'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
             activeIcon: Icon(Icons.calendar_today),

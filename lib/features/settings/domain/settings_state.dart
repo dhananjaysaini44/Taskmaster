@@ -11,5 +11,6 @@ class SettingsState with _$SettingsState {
     @Default(0xFF3B82F6) int defaultAccentColorValue,
   }) = _SettingsState;
 
-  factory SettingsState.fromJson(Map<String, dynamic> json) => _$SettingsStateFromJson(json);
+  factory SettingsState.fromJson(Map<String, dynamic> json) =>
+      _$SettingsStateFromJson(json);
 }

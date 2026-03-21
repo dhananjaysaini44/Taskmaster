@@ -6,22 +6,17 @@ part 'app_user.g.dart';
 class AppUser extends HiveObject {
   @HiveField(0)
   final String uid;
-  
+
   @HiveField(1)
   final String? email;
-  
+
   @HiveField(2)
   final String? displayName;
-  
+
   @HiveField(3)
   final String? photoURL;
 
-  AppUser({
-    required this.uid,
-    this.email,
-    this.displayName,
-    this.photoURL,
-  });
+  AppUser({required this.uid, this.email, this.displayName, this.photoURL});
 
   Map<String, dynamic> toMap() {
     return {

@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme_extension.dart';
 
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Widget? leading;
   final Widget title;
   final List<Widget>? actions;
   final bool centerTitle;
 
   const GlassAppBar({
     super.key,
+    this.leading,
     required this.title,
     this.actions,
     this.centerTitle = false,
@@ -23,12 +25,13 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           color: theme.surface.withValues(alpha: 0.7),
-          child: AppBar(
-            title: title,
-            actions: actions,
-            centerTitle: centerTitle,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
+            child: AppBar(
+              leading: leading,
+              title: title,
+              actions: actions,
+              centerTitle: centerTitle,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
             scrolledUnderElevation: 0,
           ),
         ),

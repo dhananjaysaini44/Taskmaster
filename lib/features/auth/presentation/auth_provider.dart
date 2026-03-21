@@ -10,7 +10,7 @@ class Auth extends _$Auth {
   @override
   FutureOr<AuthState> build() async {
     final repo = ref.watch(authRepositoryProvider);
-    
+
     // Listen to auth state changes and update this notifier
     final subscription = repo.authStateChanges().listen((user) {
       if (user != null) {
@@ -47,10 +47,16 @@ class Auth extends _$Auth {
     });
   }
 
-  Future<void> signUpWithEmail(String email, String password, String name) async {
+  Future<void> signUpWithEmail(
+    String email,
+    String password,
+    String name,
+  ) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider).signUpWithEmail(email, password, name);
+      await ref
+          .read(authRepositoryProvider)
+          .signUpWithEmail(email, password, name);
       return state.value ?? const AuthState.unauthenticated();
     });
   }

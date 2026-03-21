@@ -113,12 +113,12 @@ class _ColorCircleState extends State<_ColorCircle> {
               color: widget.color,
               shape: BoxShape.circle,
               border: widget.isSelected
-                  ? Border.all(
-                      color: widget.theme.primary,
-                      width: 3,
-                    )
+                  ? Border.all(color: widget.theme.primary, width: 3)
                   : Border.all(
-                      color: widget.theme.labelSmall.color?.withValues(alpha: 0.1) ??
+                      color:
+                          widget.theme.labelSmall.color?.withValues(
+                            alpha: 0.1,
+                          ) ??
                           Colors.grey,
                       width: 1,
                     ),

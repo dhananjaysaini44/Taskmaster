@@ -26,7 +26,7 @@ The project follows a Feature-First Layered Architecture, which organizes code b
 
 Directory Structure:
 - /lib/core: Global configurations like the theme and routing.
-- /lib/features: Individual modules (auth, tasks, calendar, home, profile).
+- /lib/features: Individual modules (auth, tasks, calendar, home, profile, splash, settings).
 - /lib/shared: Reusable UI components used across multiple features.
 
 3. DETAILED DIRECTORY & FILE STRUCTURE
@@ -68,14 +68,14 @@ Directory Structure:
 │   ├── tasks/ (Task Management)
 │   │   ├── domain/task_model.dart: Defines the Task properties (id, title, priority, status).
 │   │   ├── data/task_repository.dart: The engine that saves tasks to Hive and syncs them with `users/{uid}/tasks` in Firestore.
-│   │   ├── presentation/tasks_screen.dart: The main list view with personalized greetings.
+│   │   ├── presentation/tasks_screen.dart: The high-fidelity Kanban board with Drag & Drop support.
 │   │   ├── presentation/tasks_provider.dart: The state bridge between the UI and the repository.
 │   │   └── presentation/widgets/: Sub-widgets like TaskCard and AddTaskModal.
 │   │
 │   ├── calendar/ (Schedule Management)
 │   │   ├── domain/models/calendar_event_model.dart: Logic for events (time, category, color).
-│   │   ├── presentation/calendar_screen.dart: The Calendar UI with schedule view.
-│   │   └── presentation/events_provider.dart: State & persistence logic for events, synchronized with Firestore.
+│   │   ├── presentation/calendar_screen.dart: The Calendar UI with Focus Flow dashboard and streak tracking.
+│   │   └── presentation/events_provider.dart: State management for events, includes streak calculation and Firestore sync.
 │   │
 │   ├── home/ (Productivity Analytics)
 │   │   └── presentation/home_screen.dart: The dashboard for tracking completion metrics across devices.
@@ -84,7 +84,7 @@ Directory Structure:
 │   │   └── presentation/profile_screen.dart: Manage user details and app configuration.
 │   │
 │   └── splash/ (Launch Experience)
-│       ├── presentation/splash_screen.dart: The cinematic opening screen.
+│      ├── presentation/splash_screen.dart: The cinematic 1.5-second opening screen featuring the `logo_splash.png` with a zoom-in animation on theme-aware solid backgrounds.
 │       └── presentation/splash_provider.dart: Controls the timing and redirection of the splash flow.
 │
 └── shared/ (Universal Components)
@@ -105,28 +105,29 @@ B. Login Screen
 A clean, center-aligned branding page that supports secure authentication via Firebase. The screen utilizes dynamic background assets that adjust based on the current system theme.
 
 C. Tasks Screen
-The secondary hub for productivity, focusing on granular task interactions.
+The high-fidelity Kanban-style hub for productivity, focusing on granular task interactions.
 - Filtering: View "All", "Upcoming", or "Completed" tasks.
 - Interaction: 
-  * Tap to Edit a task details.
+  * Tap to Edit task details or notes.
   * Check the circular box to mark as complete.
   * Long-press to delete (with confirmation).
-- Organization: Drag and drop tasks using the explicit reorder handles on the right. Changes are synced instantly to the cloud.
+- Organization: Intuitive Kanban columns with full Drag & Drop support. Move tasks between statuses instantly with persistent reorder handles. Changes are synced instantly to the cloud.
 
 D. Calendar Screen
-A visual schedule of your commitments.
-- Interactive Calendar: View events specifically for the selected day.
-- Event Management: Add, Edit, Delete, or mark events as completed.
-- Custom Styles: Choose from categories like Work, Gym, or Personal with distinct accent colors.
-- Cloud Sync: All events are backed up to Firestore, ensuring your schedule is safe across devices.
+A visual schedule and performance tracker for your commitments.
+- Focus Flow Header: Displays the full ordinal date (e.g., "March 21st") and a dynamic themed counter for pending events.
+- Interactive Calendar: View and manage events for any selected day.
+- Event Management: Add, Edit, Delete, or toggle completion for events.
+- Streak Tracking: An integrated dashboard counts weekly completed events and displays your current productivity streak.
+- Cloud Sync: Real-time Firestore synchronization keeps your schedule consistent across all devices.
 
 E. Home Screen (Intelligence Dashboard)
 The primary landing experience and analytics hub.
-- Personalized Greeting: Displays "Welcome, [User Name]" dynamically based on the logged-in user.
-- Completion Metrics: High-fidelity visualizations (charts) of your task and event productivity.
-- Immediate Actions: View and toggle urgent upcoming tasks directly from the dashboard.
-- Direct Navigation: Tapping the user's name or avatar in the header now redirects instantly to the Profile screen.
-- Refined Layout: Optimized vertical spacing for a more compact and balanced aesthetic.
+- Personalized Greeting: Displays dynamic greetings based on your profile and time of day.
+- Completion Metrics: High-fidelity visualizations (charts) derived from both tasks and events.
+- Upcoming Deadlines: An expanded list of up to 10 entries merging tasks and events, allowing for direct completion toggling from the dashboard.
+- Direct Navigation: Tapping the user profile header redirects instantly to the Profile management suite.
+- Refined Layout: Optimized vertical spacing and interactive elements for a premium "Ambient" feel.
 
 F. Profile & Settings Screen
 Manage your identity and application environment.
@@ -196,6 +197,6 @@ To run the project locally:
 4. Launch via `flutter run`.
 
 ---
-Current Project State: v 1.6.0 - Advanced Profile Management & Data Privacy Release
+Current Project State: 1.7.0 - Advanced Kanban & Focus Flow Release
 Documentation maintained by the Taskmaster Engineering Team.
 Dhananjay Saini (GitHub: @dhananjaysaini44)

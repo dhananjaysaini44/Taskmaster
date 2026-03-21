@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../../shared/widgets/glass_app_bar.dart';
 import '../domain/models/calendar_event_model.dart';
 import 'events_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
-import '../../../shared/widgets/color_picker_widget.dart';
+import 'widgets/add_event_modal.dart';
+import 'event_detail_screen.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -20,6 +19,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  bool _showCompletedEvents = false;
 
   @override
   void initState() {
@@ -27,7 +27,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     _selectedDay = _focusedDay;
   }
 
-  List<CalendarEventModel> _getEventsForDay(DateTime day, List<CalendarEventModel> allEvents) {
+  List<CalendarEventModel> _getEventsForDay(
+    DateTime day,
+    List<CalendarEventModel> allEvents,
+  ) {
     return allEvents.where((event) => isSameDay(event.startTime, day)).toList();
   }
 
@@ -39,9 +42,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: const GlassAppBar(
-        title: Text('Calendar'),
-      ),
       body: eventsAsync.when(
         data: (events) => _buildBody(context, theme, events),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,27 +55,117 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppThemeExtension theme, List<CalendarEventModel> events) {
-    return Column(
-      children: [
-        SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight + theme.spacingMD),
-        _buildCalendar(theme, events),
-        const SizedBox(height: 16),
-        _buildEventsHeader(theme),
-        Expanded(
-          child: _buildEventsList(theme, events),
-        ),
-      ],
+  Widget _buildBody(
+    BuildContext context,
+    AppThemeExtension theme,
+    List<CalendarEventModel> events,
+  ) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + theme.spacingLG * 0.73,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFocusFlowHeader(theme, events),
+          SizedBox(height: theme.spacingLG),
+          _buildCalendar(theme, events),
+          SizedBox(height: theme.spacingLG),
+          _buildEventsHeader(theme),
+          _buildEventsList(theme, events),
+          SizedBox(height: theme.spacingLG),
+          _buildStreakContainer(theme, events),
+          const SizedBox(height: 100),
+        ],
+      ),
     );
   }
 
-  Widget _buildCalendar(AppThemeExtension theme, List<CalendarEventModel> events) {
+  Widget _buildFocusFlowHeader(AppThemeExtension theme, List<CalendarEventModel> events) {
+    final dayEvents = _getEventsForDay(_selectedDay ?? DateTime.now(), events);
+    final pendingCount = dayEvents.where((e) => !e.isCompleted).length;
+    final dateStr = _getOrdinalDate(_selectedDay ?? DateTime.now());
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            dateStr,
+            style: theme.labelSmall.copyWith(
+              color: theme.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            'Focus Flow',
+            style: theme.displayLarge.copyWith(
+              fontSize: 36,
+              fontWeight: FontWeight.w900,
+              color: theme.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 2),
+          RichText(
+            text: TextSpan(
+              style: theme.bodySmall.copyWith(
+                fontSize: 15,
+                color: theme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              children: [
+                const TextSpan(text: "You have "),
+                TextSpan(
+                  text: "$pendingCount ${pendingCount == 1 ? 'event' : 'events'}",
+                  style: TextStyle(
+                    color: theme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const TextSpan(text: " remaining for the day"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getOrdinalDate(DateTime date) {
+    final day = date.day;
+    String suffix = 'th';
+    if (day >= 11 && day <= 13) {
+      suffix = 'th';
+    } else {
+      switch (day % 10) {
+        case 1:
+          suffix = 'st';
+          break;
+        case 2:
+          suffix = 'nd';
+          break;
+        case 3:
+          suffix = 'rd';
+          break;
+        default:
+          suffix = 'th';
+      }
+    }
+    return "${DateFormat('MMMM d').format(date)}$suffix, ${DateFormat('yyyy').format(date)}";
+  }
+
+  Widget _buildCalendar(
+    AppThemeExtension theme,
+    List<CalendarEventModel> events,
+  ) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: theme.spacingLG),
       decoration: BoxDecoration(
-        color: theme.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(theme.radiusLG),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
+        color: theme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.borderSecondary),
       ),
       child: TableCalendar<CalendarEventModel>(
         firstDay: DateTime.utc(2020, 1, 1),
@@ -106,7 +196,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             shape: BoxShape.circle,
           ),
           todayDecoration: BoxDecoration(
-            color: theme.primary.withValues(alpha: 0.3),
+            color: theme.primary.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           markerDecoration: BoxDecoration(
@@ -120,14 +210,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
-          formatButtonTextStyle: TextStyle(color: theme.textSecondary),
-          formatButtonDecoration: BoxDecoration(
-            color: theme.surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
           leftChevronIcon: Icon(Icons.chevron_left, color: theme.textSecondary),
-          rightChevronIcon: Icon(Icons.chevron_right, color: theme.textSecondary),
-          titleTextStyle: theme.titleMedium.copyWith(fontWeight: FontWeight.bold),
+          rightChevronIcon: Icon(
+            Icons.chevron_right,
+            color: theme.textSecondary,
+          ),
+          titleTextStyle: theme.titleMedium.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -145,40 +235,184 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           const Spacer(),
           Text(
             DateFormat('MMMM dd, yyyy').format(_selectedDay ?? DateTime.now()),
-            style: theme.labelSmall.copyWith(color: theme.labelSmall.color?.withValues(alpha: 0.6)),
+            style: theme.labelSmall.copyWith(
+              color: theme.textSecondary,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEventsList(AppThemeExtension theme, List<CalendarEventModel> events) {
+  Widget _buildEventsList(
+    AppThemeExtension theme,
+    List<CalendarEventModel> events,
+  ) {
     final dayEvents = _getEventsForDay(_selectedDay ?? DateTime.now(), events);
+    final pendingEvents = dayEvents.where((e) => !e.isCompleted).toList();
+    final completedEvents = dayEvents.where((e) => e.isCompleted).toList();
 
     if (dayEvents.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event_available_outlined, size: 64, color: theme.labelSmall.color?.withValues(alpha: 0.2)),
-            const SizedBox(height: 16),
-            Text(
-              'No events for this day',
-              style: theme.bodyMedium.copyWith(color: theme.labelSmall.color?.withValues(alpha: 0.4)),
-            ),
-          ],
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: theme.spacingXL),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.event_available_outlined,
+                size: 48,
+                color: theme.textHint.withValues(alpha: 0.2),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No events for this day',
+                style: theme.bodyMedium.copyWith(
+                  color: theme.textHint,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
-      itemCount: dayEvents.length,
-      itemBuilder: (context, index) {
-        final event = dayEvents[index];
-        return _EventCard(event: event, theme: theme);
-      },
+    return Column(
+      children: [
+        if (pendingEvents.isNotEmpty)
+          ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
+            itemCount: pendingEvents.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final event = pendingEvents[index];
+              return _EventCard(event: event, theme: theme);
+            },
+          ),
+        if (completedEvents.isNotEmpty) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
+            child: TextButton.icon(
+              onPressed: () => setState(() => _showCompletedEvents = !_showCompletedEvents),
+              icon: Icon(
+                _showCompletedEvents ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                size: 18,
+                color: theme.textSecondary,
+              ),
+              label: Text(
+                '${_showCompletedEvents ? 'Hide' : 'Show'} Completed (${completedEvents.length})',
+                style: theme.labelSmall.copyWith(
+                  color: theme.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          if (_showCompletedEvents)
+            ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
+              itemCount: completedEvents.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final event = completedEvents[index];
+                return _EventCard(event: event, theme: theme);
+              },
+            ),
+        ],
+      ],
     );
+  }
+
+  Widget _buildStreakContainer(
+    AppThemeExtension theme,
+    List<CalendarEventModel> events,
+  ) {
+    final streak = _calculateStreak(events);
+    final totalCompleted = events.where((e) => e.isCompleted).length;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: theme.spacingLG),
+      padding: EdgeInsets.all(theme.spacingLG),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.secondary,
+        borderRadius: BorderRadius.circular(theme.radiusXL),
+        boxShadow: [
+          BoxShadow(
+            color: theme.secondary.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+              if (streak > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$streak Day Streak',
+                    style: theme.labelSmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$totalCompleted',
+            style: theme.displayLarge.copyWith(
+              color: Colors.white,
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'TOTAL COMPLETED',
+            style: theme.labelSmall.copyWith(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _calculateStreak(List<CalendarEventModel> events) {
+    final now = DateTime.now();
+    // Filter events that have finished and are not all-day (or handle all-day similarly)
+    final pastEvents = events.where((e) => e.endTime.isBefore(now)).toList()
+      ..sort((a, b) => b.endTime.compareTo(a.endTime));
+
+    int streak = 0;
+    for (final event in pastEvents) {
+      if (event.isCompleted) {
+        streak++;
+      } else {
+        // Streak breaks at the first missed event (ended but not completed)
+        break;
+      }
+    }
+    return streak;
   }
 
   void _showAddEventModal(BuildContext context) {
@@ -186,7 +420,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _AddEventModal(initialDate: _selectedDay ?? DateTime.now()),
+      builder: (context) =>
+          AddEventModal(initialDate: _selectedDay ?? DateTime.now()),
     );
   }
 }
@@ -200,71 +435,84 @@ class _EventCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timeFormat = DateFormat('hh:mm a');
-    final timeRange = '${timeFormat.format(event.startTime)} - ${timeFormat.format(event.endTime)}';
+    final timeRange =
+        '${timeFormat.format(event.startTime)} - ${timeFormat.format(event.endTime)}';
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 300),
-      opacity: event.isCompleted ? 0.4 : 1.0,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: theme.surface.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(theme.radiusLG),
-          border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(theme.radiusLG),
-            onTap: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => _AddEventModal(
-                initialDate: event.startTime,
-                event: event,
-              ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: theme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.borderSecondary),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailScreen(event: event),
             ),
-            onLongPress: () => _showDeleteDialog(context, ref),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  _buildCheckmark(context, ref),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event.title,
-                          style: theme.titleSmall.copyWith(
-                            fontWeight: FontWeight.bold,
-                            decoration: event.isCompleted ? TextDecoration.lineThrough : null,
-                          ),
+          ),
+          onLongPress: () => _showDeleteDialog(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildCheckmark(context, ref),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: theme.titleSmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          decoration: event.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          color: event.isCompleted ? theme.textHint : theme.textPrimary,
                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        timeRange,
+                        style: theme.labelSmall.copyWith(
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                      if (event.notes != null && event.notes!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
-                          timeRange,
-                          style: theme.labelSmall.copyWith(color: theme.labelSmall.color?.withValues(alpha: 0.6)),
+                          event.notes!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodySmall.copyWith(
+                            color: theme.textHint,
+                            fontSize: 10,
+                          ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: _getCategoryColor(event.category, theme).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _getCategoryIcon(event.category),
-                      color: _getCategoryColor(event.category, theme),
-                      size: 20,
-                    ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _getCategoryColor(
+                      theme,
+                    ).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-              ),
+                  child: Icon(
+                    _getCategoryIcon(event.category),
+                    color: _getCategoryColor(theme),
+                    size: 18,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -276,46 +524,53 @@ class _EventCard extends ConsumerWidget {
     return InkWell(
       onTap: () {
         // Toggle completion
-        ref.read(eventsProviderProvider.notifier).toggleEventCompletion(event.id);
+        ref
+            .read(eventsProviderProvider.notifier)
+            .toggleEventCompletion(event.id);
       },
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 24,
-        height: 24,
+        width: 22,
+        height: 22,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
             color: event.isCompleted
-                ? _getCategoryColor(event.category, theme)
+                ? _getCategoryColor(theme)
                 : theme.textHint.withValues(alpha: 0.5),
             width: 2,
           ),
-          color: event.isCompleted ? _getCategoryColor(event.category, theme) : Colors.transparent,
+          color: event.isCompleted
+              ? _getCategoryColor(theme)
+              : Colors.transparent,
         ),
         child: event.isCompleted
-            ? const Icon(Icons.check, size: 16, color: Colors.white)
+            ? const Icon(Icons.check, size: 14, color: Colors.white)
             : null,
       ),
     );
   }
 
   void _showDeleteDialog(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context).appTheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: const Text('Are you sure you want to delete this event?'),
+        backgroundColor: theme.surfaceColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Delete Event', style: theme.titleMedium),
+        content: Text('Are you sure you want to delete this event?', style: theme.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: theme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(eventsProviderProvider.notifier).deleteEvent(event.id);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: theme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -338,388 +593,8 @@ class _EventCard extends ConsumerWidget {
     }
   }
 
-  Color _getCategoryColor(String category, AppThemeExtension theme) {
-    if (event.colorValue != null) {
-      return Color(event.colorValue!);
-    }
-    switch (category.toLowerCase()) {
-      case 'meeting':
-        return theme.primary;
-      case 'gym':
-        return theme.accent;
-      case 'work':
-        return Colors.orangeAccent;
-      case 'personal':
-        return Colors.purpleAccent;
-      default:
-        return theme.primary;
-    }
+  Color _getCategoryColor(AppThemeExtension theme) {
+    return event.isCompleted ? Colors.blue : Colors.red;
   }
 }
 
-class _AddEventModal extends ConsumerStatefulWidget {
-  final DateTime initialDate;
-  final CalendarEventModel? event;
-  const _AddEventModal({required this.initialDate, this.event});
-
-  @override
-  ConsumerState<_AddEventModal> createState() => _AddEventModalState();
-}
-
-class _AddEventModalState extends ConsumerState<_AddEventModal> {
-  final _titleController = TextEditingController();
-  late DateTime _selectedDate;
-  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
-  String _selectedCategory = 'Personal';
-  String? _customCategoryName;
-
-  late Color _selectedColor;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.event != null) {
-      _titleController.text = widget.event!.title;
-      _selectedDate = widget.event!.startTime;
-      _startTime = TimeOfDay.fromDateTime(widget.event!.startTime);
-      _endTime = TimeOfDay.fromDateTime(widget.event!.endTime);
-      _selectedCategory = widget.event!.category[0].toUpperCase() + widget.event!.category.substring(1);
-      // Check if it's a custom category
-      final standardCategories = ['Personal', 'Meeting', 'Gym', 'Work'];
-      if (!standardCategories.contains(_selectedCategory)) {
-        _customCategoryName = _selectedCategory;
-        _selectedCategory = 'Custom';
-      }
-    } else {
-      _selectedDate = widget.initialDate;
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (widget.event?.colorValue != null) {
-      _selectedColor = Color(widget.event!.colorValue!);
-    } else {
-      _selectedColor = Theme.of(context).appTheme.primary;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).appTheme;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
-      decoration: BoxDecoration(
-        color: theme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(
-        color: theme.primary.withValues(alpha: 0.1),
-        width: 1.5,
-        ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.event != null ? 'Edit Event' : 'Add New Event',
-                  style: theme.displayLarge.copyWith(fontSize: 28),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.close, color: theme.textPrimary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _titleController,
-              autofocus: true,
-              style: TextStyle(color: theme.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'Event Title',
-                hintStyle: TextStyle(color: theme.textHint),
-                filled: true,
-                fillColor: theme.background.withValues(alpha: 0.5),
-                prefixIcon: Icon(Icons.edit_note_rounded, color: theme.primary),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildDateTimePicker(theme),
-            const SizedBox(height: 24),
-            _buildCategorySelector(theme),
-            const SizedBox(height: 24),
-            Text(
-              'Accent Color',
-              style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ColorPickerWidget(
-              presets: const [
-                Color(0xFF42A5F5),
-                Color(0xFF66BB6A),
-                Color(0xFFFFA726),
-                Color(0xFFEF5350),
-                Color(0xFFAB47BC),
-              ],
-              selected: _selectedColor,
-              onChanged: (color) => setState(() => _selectedColor = color),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveEvent,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primary,
-                  foregroundColor: theme.surface,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 8,
-                  shadowColor: theme.primary.withValues(alpha: 0.4),
-                ),
-                child: Text(
-                  widget.event != null ? 'Update Event' : 'Save Event',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateTimePicker(AppThemeExtension theme) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: _selectedDate,
-              firstDate: DateTime.now().subtract(const Duration(days: 365)),
-              lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-            );
-            if (picked != null) setState(() => _selectedDate = picked);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: theme.surface,
-              borderRadius: BorderRadius.circular(theme.radiusMD),
-              border: Border.all(color: theme.borderSecondary),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.calendar_today_rounded, size: 18, color: theme.primary),
-                const SizedBox(width: 12),
-                Text(
-                  DateFormat('EEEE, MMM dd').format(_selectedDate),
-                  style: theme.bodyMedium,
-                ),
-                const Spacer(),
-                Icon(Icons.edit, size: 16, color: theme.textHint),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () async {
-                  final picked = await showTimePicker(context: context, initialTime: _startTime);
-                  if (picked != null) setState(() => _startTime = picked);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: theme.surface,
-                    borderRadius: BorderRadius.circular(theme.radiusMD),
-                    border: Border.all(color: theme.borderSecondary),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time_rounded, size: 18, color: theme.primary),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Start: ${_startTime.format(context)}',
-                        style: theme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: InkWell(
-                onTap: () async {
-                  final picked = await showTimePicker(context: context, initialTime: _endTime);
-                  if (picked != null) setState(() => _endTime = picked);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: theme.surface,
-                    borderRadius: BorderRadius.circular(theme.radiusMD),
-                    border: Border.all(color: theme.borderSecondary),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time_rounded, size: 18, color: theme.primary),
-                      const SizedBox(width: 12),
-                      Text(
-                        'End: ${_endTime.format(context)}',
-                        style: theme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategorySelector(AppThemeExtension theme) {
-    final categories = ['Personal', 'Meeting', 'Gym', 'Work', 'Custom'];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Category', style: theme.labelSmall.copyWith(color: theme.textSecondary.withValues(alpha: 0.7))),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          children: categories.map((cat) {
-            final isSelected = _selectedCategory == cat;
-            final label = (cat == 'Custom' && _customCategoryName != null) ? _customCategoryName! : cat;
-            return ChoiceChip(
-              label: Text(label),
-              selected: isSelected,
-              onSelected: (selected) async {
-                if (selected) {
-                  if (cat == 'Custom') {
-                    final name = await _showCustomCategoryDialog(context);
-                    if (name != null && name.isNotEmpty) {
-                      setState(() {
-                        _selectedCategory = cat;
-                        _customCategoryName = name;
-                      });
-                    }
-                  } else {
-                    setState(() {
-                      _selectedCategory = cat;
-                      _customCategoryName = null;
-                    });
-                  }
-                }
-              },
-              backgroundColor: theme.background,
-              selectedColor: theme.primary.withValues(alpha: 0.2),
-              labelStyle: TextStyle(
-                color: isSelected ? theme.primary : theme.textSecondary,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: isSelected ? theme.primary : theme.primary.withValues(alpha: 0.1)),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Future<String?> _showCustomCategoryDialog(BuildContext context) async {
-    final theme = Theme.of(context).appTheme;
-    String customName = _customCategoryName ?? '';
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.surface,
-        title: Text('Custom Category', style: theme.titleMedium),
-        content: TextField(
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Enter category name',
-            hintStyle: TextStyle(color: theme.textHint),
-          ),
-          style: TextStyle(color: theme.textPrimary),
-          onChanged: (value) => customName = value,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: theme.textHint)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, customName),
-            child: Text('OK', style: TextStyle(color: theme.primary)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _saveEvent() {
-    if (_titleController.text.isEmpty) return;
-
-    final start = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    final end = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-
-    final category = (_selectedCategory == 'Custom' && _customCategoryName != null) 
-        ? _customCategoryName!.toLowerCase() 
-        : _selectedCategory.toLowerCase();
-
-    if (widget.event != null) {
-      final updatedEvent = widget.event!.copyWith(
-        title: _titleController.text,
-        startTime: start,
-        endTime: end,
-        category: category,
-        colorValue: _selectedColor.toARGB32(),
-      );
-      ref.read(eventsProviderProvider.notifier).updateEvent(updatedEvent);
-    } else {
-      final event = CalendarEventModel(
-        id: const Uuid().v4(),
-        title: _titleController.text,
-        startTime: start,
-        endTime: end,
-        category: category,
-        colorValue: _selectedColor.toARGB32(),
-      );
-      ref.read(eventsProviderProvider.notifier).addEvent(event);
-    }
-    Navigator.pop(context);
-  }
-}

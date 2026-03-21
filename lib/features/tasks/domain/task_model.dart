@@ -6,6 +6,8 @@ part 'task_model.g.dart';
 
 enum TaskPriority { high, medium, low }
 
+enum TaskStatus { todo, inProgress, completed }
+
 @freezed
 class TaskModel with _$TaskModel {
   const factory TaskModel({
@@ -13,9 +15,12 @@ class TaskModel with _$TaskModel {
     required String title,
     @Default(TaskPriority.medium) TaskPriority priority,
     @Default(0xFF42A5F5) int colorValue,
-    @Default(false) bool isCompleted,
+    @Default(TaskStatus.todo) TaskStatus status,
+    @Default(0.0) double progressPercentage,
     required DateTime createdAt,
     required DateTime dueDate,
+    DateTime? completedAt,
+    String? notes,
   }) = _TaskModel;
 
   factory TaskModel.fromJson(Map<String, dynamic> json) =>
@@ -34,4 +39,3 @@ class TaskModel with _$TaskModel {
     }
   }
 }
-

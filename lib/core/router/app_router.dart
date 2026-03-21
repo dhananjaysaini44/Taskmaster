@@ -24,7 +24,8 @@ class RouterRefreshNotifier extends ChangeNotifier {
 }
 
 @riverpod
-RouterRefreshNotifier routerRefresh(RouterRefreshRef ref) => RouterRefreshNotifier(ref);
+RouterRefreshNotifier routerRefresh(RouterRefreshRef ref) =>
+    RouterRefreshNotifier(ref);
 
 @riverpod
 GoRouter appRouter(AppRouterRef ref) {
@@ -37,9 +38,10 @@ GoRouter appRouter(AppRouterRef ref) {
       final authState = ref.read(authProvider);
       final authValue = authState.valueOrNull;
       final splashFinished = ref.watch(splashFinishedProvider);
-      
+
       final isSplash = state.uri.path == '/splash';
-      final isAuthRoute = state.uri.path == '/login' || state.uri.path == '/signup';
+      final isAuthRoute =
+          state.uri.path == '/login' || state.uri.path == '/signup';
 
       // 1. Wait for splash to finish if we are on splash
       if (isSplash && !splashFinished) {
@@ -79,24 +81,18 @@ GoRouter appRouter(AppRouterRef ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        pageBuilder: (context, state) => FadeTransitionPage(
-          child: const SplashScreen(),
-          key: state.pageKey,
-        ),
+        pageBuilder: (context, state) =>
+            FadeTransitionPage(child: const SplashScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: '/login',
-        pageBuilder: (context, state) => FadeTransitionPage(
-          child: const LoginScreen(),
-          key: state.pageKey,
-        ),
+        pageBuilder: (context, state) =>
+            FadeTransitionPage(child: const LoginScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: '/signup',
-        pageBuilder: (context, state) => FadeTransitionPage(
-          child: const SignupScreen(),
-          key: state.pageKey,
-        ),
+        pageBuilder: (context, state) =>
+            FadeTransitionPage(child: const SignupScreen(), key: state.pageKey),
       ),
       ShellRoute(
         builder: (context, state, child) => MainAppShell(child: child),
@@ -122,7 +118,7 @@ GoRouter appRouter(AppRouterRef ref) {
               key: state.pageKey,
             ),
           ),
-// /stats removed, replaced by / (Home) and /tasks
+          // /stats removed, replaced by / (Home) and /tasks
           GoRoute(
             path: '/profile',
             pageBuilder: (context, state) => FadeTransitionPage(
@@ -144,15 +140,13 @@ GoRouter appRouter(AppRouterRef ref) {
 }
 
 class FadeTransitionPage extends CustomTransitionPage<void> {
-  FadeTransitionPage({
-    required super.child,
-    required super.key,
-  }) : super(
-          transitionDuration: const Duration(milliseconds: 300),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-              FadeTransition(
-            opacity: CurveTween(curve: Curves.easeOut).animate(animation),
-            child: child,
-          ),
-        );
+  FadeTransitionPage({required super.child, required super.key})
+    : super(
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(
+              opacity: CurveTween(curve: Curves.easeOut).animate(animation),
+              child: child,
+            ),
+      );
 }

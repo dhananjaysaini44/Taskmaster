@@ -1,1 +1,1 @@
-enum TaskFilter { all, upcoming, completed }
+enum TaskFilter { all, todo, inProgress, completed }

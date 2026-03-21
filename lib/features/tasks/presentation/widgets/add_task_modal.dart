@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +17,7 @@ class AddTaskModal extends ConsumerStatefulWidget {
 
 class _AddTaskModalState extends ConsumerState<AddTaskModal> {
   final _titleController = TextEditingController();
+  final _notesController = TextEditingController();
   late TaskPriority _priority;
   late DateTime _dueDate;
   late Color _selectedColor;
@@ -27,6 +27,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
     super.initState();
     if (widget.task != null) {
       _titleController.text = widget.task!.title;
+      _notesController.text = widget.task!.notes ?? '';
       _priority = widget.task!.priority;
       _dueDate = widget.task!.dueDate;
     } else {
@@ -48,6 +49,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
   @override
   void dispose() {
     _titleController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -82,7 +84,13 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
       if (!mounted) return;
       if (time != null) {
         setState(() {
-          _dueDate = DateTime(picked.year, picked.month, picked.day, time.hour, time.minute);
+          _dueDate = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
         });
       }
     }
@@ -96,14 +104,18 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
       if (widget.task != null) {
         final updatedTask = widget.task!.copyWith(
           title: title,
+          notes: _notesController.text.trim(),
           priority: _priority,
           colorValue: _selectedColor.toARGB32(),
           dueDate: _dueDate,
         );
         await ref.read(tasksProviderProvider.notifier).updateTask(updatedTask);
       } else {
-        await ref.read(tasksProviderProvider.notifier).addTask(
+        await ref
+            .read(tasksProviderProvider.notifier)
+            .addTask(
               title: title,
+              notes: _notesController.text.trim(),
               priority: _priority,
               colorValue: _selectedColor.toARGB32(),
               dueDate: _dueDate,
@@ -112,9 +124,9 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -130,17 +142,14 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
       builder: (context, scrollController) {
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.surface.withValues(alpha: 0.85),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                border: Border.all(
-                  color: theme.borderSecondary,
-                  width: 1.5,
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
               ),
+              border: Border.all(color: theme.borderSecondary, width: 1.5),
+            ),
               child: SingleChildScrollView(
                 controller: scrollController,
                 padding: EdgeInsets.all(theme.spacingLG),
@@ -165,20 +174,39 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                       label: 'Task Title',
                       hint: 'What needs to be done?',
                       controller: _titleController,
-                      prefixIcon: Icon(Icons.edit_note_rounded, color: theme.primary),
+                      prefixIcon: Icon(
+                        Icons.edit_note_rounded,
+                        color: theme.primary,
+                      ),
                     ),
                     SizedBox(height: theme.spacingLG),
-                    
+                    AuthTextField(
+                      label: 'Notes',
+                      hint: 'Add more details...',
+                      controller: _notesController,
+                      maxLines: 3,
+                      prefixIcon: Icon(
+                        Icons.description_rounded,
+                        color: theme.primary,
+                      ),
+                    ),
+                    SizedBox(height: theme.spacingLG),
+
                     // Due Date Picker
                     Text(
                       'Due Date',
-                      style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.labelSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     InkWell(
                       onTap: _selectDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.surface,
                           borderRadius: BorderRadius.circular(theme.radiusMD),
@@ -186,10 +214,16 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.calendar_today_rounded, size: 18, color: theme.primary),
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 18,
+                              color: theme.primary,
+                            ),
                             const SizedBox(width: 12),
                             Text(
-                              DateFormat('MMM dd, yyyy - hh:mm a').format(_dueDate),
+                              DateFormat(
+                                'MMM dd, yyyy - hh:mm a',
+                              ).format(_dueDate),
                               style: theme.bodyMedium,
                             ),
                             const Spacer(),
@@ -198,11 +232,13 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         ),
                       ),
                     ),
-                    
+
                     SizedBox(height: theme.spacingLG),
                     Text(
                       'Priority',
-                      style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.labelSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SegmentedButton<TaskPriority>(
@@ -236,7 +272,9 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                     SizedBox(height: theme.spacingLG),
                     Text(
                       'Accent Color',
-                      style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.labelSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     ColorPickerWidget(
@@ -248,14 +286,17 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         Color(0xFFAB47BC),
                       ],
                       selected: _selectedColor,
-                      onChanged: (color) => setState(() => _selectedColor = color),
+                      onChanged: (color) =>
+                          setState(() => _selectedColor = color),
                     ),
                     SizedBox(height: theme.spacingXL),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.primary,
                         foregroundColor: theme.surface,
-                        padding: EdgeInsets.symmetric(vertical: theme.spacingMD),
+                        padding: EdgeInsets.symmetric(
+                          vertical: theme.spacingMD,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(theme.radiusMD),
                         ),
@@ -265,18 +306,19 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                       onPressed: _submit,
                       child: Text(
                         widget.task != null ? 'Update Task' : 'Add Task',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     SizedBox(height: theme.spacingXL),
                   ],
                 ),
               ),
-            ),
           ),
         );
       },
     );
   }
 }
-

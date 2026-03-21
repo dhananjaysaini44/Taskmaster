@@ -24,9 +24,12 @@ mixin _$TaskModel {
   String get title => throw _privateConstructorUsedError;
   TaskPriority get priority => throw _privateConstructorUsedError;
   int get colorValue => throw _privateConstructorUsedError;
-  bool get isCompleted => throw _privateConstructorUsedError;
+  TaskStatus get status => throw _privateConstructorUsedError;
+  double get progressPercentage => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get dueDate => throw _privateConstructorUsedError;
+  DateTime? get completedAt => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,9 +47,12 @@ abstract class $TaskModelCopyWith<$Res> {
       String title,
       TaskPriority priority,
       int colorValue,
-      bool isCompleted,
+      TaskStatus status,
+      double progressPercentage,
       DateTime createdAt,
-      DateTime dueDate});
+      DateTime dueDate,
+      DateTime? completedAt,
+      String? notes});
 }
 
 /// @nodoc
@@ -66,9 +72,12 @@ class _$TaskModelCopyWithImpl<$Res, $Val extends TaskModel>
     Object? title = null,
     Object? priority = null,
     Object? colorValue = null,
-    Object? isCompleted = null,
+    Object? status = null,
+    Object? progressPercentage = null,
     Object? createdAt = null,
     Object? dueDate = null,
+    Object? completedAt = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -87,10 +96,14 @@ class _$TaskModelCopyWithImpl<$Res, $Val extends TaskModel>
           ? _value.colorValue
           : colorValue // ignore: cast_nullable_to_non_nullable
               as int,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as TaskStatus,
+      progressPercentage: null == progressPercentage
+          ? _value.progressPercentage
+          : progressPercentage // ignore: cast_nullable_to_non_nullable
+              as double,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -99,6 +112,14 @@ class _$TaskModelCopyWithImpl<$Res, $Val extends TaskModel>
           ? _value.dueDate
           : dueDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -116,9 +137,12 @@ abstract class _$$TaskModelImplCopyWith<$Res>
       String title,
       TaskPriority priority,
       int colorValue,
-      bool isCompleted,
+      TaskStatus status,
+      double progressPercentage,
       DateTime createdAt,
-      DateTime dueDate});
+      DateTime dueDate,
+      DateTime? completedAt,
+      String? notes});
 }
 
 /// @nodoc
@@ -136,9 +160,12 @@ class __$$TaskModelImplCopyWithImpl<$Res>
     Object? title = null,
     Object? priority = null,
     Object? colorValue = null,
-    Object? isCompleted = null,
+    Object? status = null,
+    Object? progressPercentage = null,
     Object? createdAt = null,
     Object? dueDate = null,
+    Object? completedAt = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_$TaskModelImpl(
       id: null == id
@@ -157,10 +184,14 @@ class __$$TaskModelImplCopyWithImpl<$Res>
           ? _value.colorValue
           : colorValue // ignore: cast_nullable_to_non_nullable
               as int,
-      isCompleted: null == isCompleted
-          ? _value.isCompleted
-          : isCompleted // ignore: cast_nullable_to_non_nullable
-              as bool,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as TaskStatus,
+      progressPercentage: null == progressPercentage
+          ? _value.progressPercentage
+          : progressPercentage // ignore: cast_nullable_to_non_nullable
+              as double,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -169,6 +200,14 @@ class __$$TaskModelImplCopyWithImpl<$Res>
           ? _value.dueDate
           : dueDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -181,9 +220,12 @@ class _$TaskModelImpl extends _TaskModel {
       required this.title,
       this.priority = TaskPriority.medium,
       this.colorValue = 0xFF42A5F5,
-      this.isCompleted = false,
+      this.status = TaskStatus.todo,
+      this.progressPercentage = 0.0,
       required this.createdAt,
-      required this.dueDate})
+      required this.dueDate,
+      this.completedAt,
+      this.notes})
       : super._();
 
   factory _$TaskModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -201,15 +243,22 @@ class _$TaskModelImpl extends _TaskModel {
   final int colorValue;
   @override
   @JsonKey()
-  final bool isCompleted;
+  final TaskStatus status;
+  @override
+  @JsonKey()
+  final double progressPercentage;
   @override
   final DateTime createdAt;
   @override
   final DateTime dueDate;
+  @override
+  final DateTime? completedAt;
+  @override
+  final String? notes;
 
   @override
   String toString() {
-    return 'TaskModel(id: $id, title: $title, priority: $priority, colorValue: $colorValue, isCompleted: $isCompleted, createdAt: $createdAt, dueDate: $dueDate)';
+    return 'TaskModel(id: $id, title: $title, priority: $priority, colorValue: $colorValue, status: $status, progressPercentage: $progressPercentage, createdAt: $createdAt, dueDate: $dueDate, completedAt: $completedAt, notes: $notes)';
   }
 
   @override
@@ -223,17 +272,21 @@ class _$TaskModelImpl extends _TaskModel {
                 other.priority == priority) &&
             (identical(other.colorValue, colorValue) ||
                 other.colorValue == colorValue) &&
-            (identical(other.isCompleted, isCompleted) ||
-                other.isCompleted == isCompleted) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.progressPercentage, progressPercentage) ||
+                other.progressPercentage == progressPercentage) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.dueDate, dueDate) || other.dueDate == dueDate));
+            (identical(other.dueDate, dueDate) || other.dueDate == dueDate) &&
+            (identical(other.completedAt, completedAt) ||
+                other.completedAt == completedAt) &&
+            (identical(other.notes, notes) || other.notes == notes));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, title, priority, colorValue,
-      isCompleted, createdAt, dueDate);
+      status, progressPercentage, createdAt, dueDate, completedAt, notes);
 
   @JsonKey(ignore: true)
   @override
@@ -255,9 +308,12 @@ abstract class _TaskModel extends TaskModel {
       required final String title,
       final TaskPriority priority,
       final int colorValue,
-      final bool isCompleted,
+      final TaskStatus status,
+      final double progressPercentage,
       required final DateTime createdAt,
-      required final DateTime dueDate}) = _$TaskModelImpl;
+      required final DateTime dueDate,
+      final DateTime? completedAt,
+      final String? notes}) = _$TaskModelImpl;
   const _TaskModel._() : super._();
 
   factory _TaskModel.fromJson(Map<String, dynamic> json) =
@@ -272,11 +328,17 @@ abstract class _TaskModel extends TaskModel {
   @override
   int get colorValue;
   @override
-  bool get isCompleted;
+  TaskStatus get status;
+  @override
+  double get progressPercentage;
   @override
   DateTime get createdAt;
   @override
   DateTime get dueDate;
+  @override
+  DateTime? get completedAt;
+  @override
+  String? get notes;
   @override
   @JsonKey(ignore: true)
   _$$TaskModelImplCopyWith<_$TaskModelImpl> get copyWith =>

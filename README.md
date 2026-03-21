@@ -8,7 +8,7 @@
 [<img src="https://img.shields.io/badge/GoRouter-%2302569B.svg?style=flat&logo=flutter&logoColor=white" height="25">](https://pub.dev/packages/go_router)
 
 Taskmaster is a high-fidelity productivity suite developed with Flutter, designed to provide a sophisticated balance of task management, calendar coordination, and productivity analytics.
- The application adheres to a premium design philosophy, utilizing modern UI techniques to deliver an immersive "Ambient" user experience.
+The application adheres to a premium design philosophy, utilizing modern UI techniques including glassmorphism, dynamic gradients, and refined spatial layouts to deliver an immersive and intuitive user experience.
 
 ## Product Overview
 
@@ -16,8 +16,7 @@ The application is engineered for users who require a reliable and visually refi
 
 ## Principal Features
 
-### Ambient Design System
-Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features theme-aware ambient backgrounds and custom splash/login experiences that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
+Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features a cinematic 1.5-second splash experience with a zoom-in branding animation on theme-aware solid backgrounds (Deep Black/Pure White) and custom login backgrounds that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
 
 ### Hybrid Synchronization Engine
 The system utilizes a sophisticated dual-layered persistence and isolation strategy:
@@ -31,7 +30,7 @@ Users can now maintain their identity directly within the application. The new p
 The calendar module offers a unified view of time-sensitive events, categorized by professional and personal domains. It features real-time synchronization, ensuring that schedules are always current across all logged-in instances.
 
 ### Intelligence Dashboard (Landing Page)
-The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns, immediate access to pressing deadlines, and direct navigation to your profile via the interactive user header.
+The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns, immediate access to an expanded list of up to 10 pressing deadlines (including both tasks and events with completion support), and direct navigation to your profile via the interactive user header.
 
 ## Technical Implementation
 
@@ -70,12 +69,13 @@ taskmaster/
 │   │   ├── theme/
 │   │   └── utils/
 │   ├── features/       # Modular business logic and UI components
-│   │   ├── auth/       # Authentication, Login, Signup, Splash
-│   │   ├── calendar/   # Event scheduling and management
+│   │   ├── auth/       # Authentication, Login, Signup
+│   │   ├── calendar/   # Event scheduling, Focus Flow, Streak tracking
 │   │   ├── profile/    # User identity and profile settings
 │   │   ├── settings/   # Theme and application configuration
+│   │   ├── splash/     # Cinematic launch experience
 │   │   ├── home/       # Productivity analytics dashboard
-│   │   └── tasks/      # Core task management (CRUD, Reorder)
+│   │   └── tasks/      # Kanban task management (CRUD, Drag & Drop)
 │   ├── shared/         # Reusable widgets and UI components
 │   │   └── widgets/
 │   ├── firebase_options.dart
@@ -121,4 +121,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: 1.6.0
+Project Version: 1.7.0

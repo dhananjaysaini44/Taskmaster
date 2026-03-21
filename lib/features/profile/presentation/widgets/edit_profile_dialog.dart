@@ -39,7 +39,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     setState(() => _isLoading = true);
     try {
       final notifier = ref.read(authProvider.notifier);
-      
+
       // Update Name if changed
       if (_nameController.text != widget.currentName) {
         await notifier.updateDisplayName(_nameController.text);
@@ -58,9 +58,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating profile: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -82,7 +82,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
         ),
         decoration: BoxDecoration(
           color: theme.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(theme.radiusXL)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(theme.radiusXL),
+          ),
         ),
         child: Form(
           key: _formKey,
@@ -111,9 +113,13 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                 decoration: InputDecoration(
                   labelText: 'Display Name',
                   prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                 ),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter a name'
+                    : null,
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -129,7 +135,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                 decoration: InputDecoration(
                   labelText: 'New Password',
                   prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                 ),
                 validator: (value) {
                   if (value != null && value.isNotEmpty && value.length < 6) {
@@ -145,10 +153,13 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                 decoration: InputDecoration(
                   labelText: 'Confirm New Password',
                   prefixIcon: const Icon(Icons.lock_clock_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                 ),
                 validator: (value) {
-                  if (_passwordController.text.isNotEmpty && value != _passwordController.text) {
+                  if (_passwordController.text.isNotEmpty &&
+                      value != _passwordController.text) {
                     return 'Passwords do not match';
                   }
                   return null;
@@ -161,12 +172,27 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                   backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 54),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusMD)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(theme.radiusMD),
+                  ),
                   elevation: 0,
                 ),
                 child: _isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ],
           ),

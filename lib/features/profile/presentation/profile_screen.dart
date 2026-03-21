@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../../shared/widgets/glass_app_bar.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../tasks/presentation/tasks_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
@@ -30,15 +29,13 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent, // Required for ambient background
       extendBodyBehindAppBar: true,
-      appBar: const GlassAppBar(
-        title: Text('My Profile'),
-      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
         child: Column(
           children: [
             SizedBox(
-              height: MediaQuery.of(context).padding.top +
+              height:
+                  MediaQuery.of(context).padding.top +
                   kToolbarHeight +
                   theme.spacingLG,
             ),
@@ -46,7 +43,7 @@ class ProfileScreen extends ConsumerWidget {
             SizedBox(height: theme.spacingXL),
             tasksAsync.when(
               data: (tasks) {
-                final stats = HomeStats.fromTasks(tasks);
+                final stats = HomeStats.calculate(tasks: tasks, events: []);
                 final pending = stats.totalTasks - stats.completedTasks;
                 return Row(
                   children: [
@@ -101,7 +98,9 @@ class ProfileScreen extends ConsumerWidget {
                   title: 'Privacy & Security',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy settings coming soon!')),
+                      const SnackBar(
+                        content: Text('Privacy settings coming soon!'),
+                      ),
                     );
                   },
                 ),
@@ -129,7 +128,7 @@ class ProfileScreen extends ConsumerWidget {
             SizedBox(height: theme.spacingXL),
             _LogoutButton(
               theme: theme,
-              onPressed: () => ref.read(authProvider.notifier).signOut(),
+              onPressed: () => _showSignOutConfirmation(context, ref),
             ),
             const SizedBox(height: 100),
           ],
@@ -169,18 +168,29 @@ class ProfileScreen extends ConsumerWidget {
                 style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: theme.spacingXL),
-              _InfoRow(theme: theme, label: 'Name', value: user?.displayName ?? 'Not set'),
-              _InfoRow(theme: theme, label: 'Email', value: user?.email ?? 'Not set'),
-              _InfoRow(theme: theme, label: 'User ID', value: user?.uid ?? 'Unknown'),
+              _InfoRow(
+                theme: theme,
+                label: 'Name',
+                value: user?.displayName ?? 'Not set',
+              ),
+              _InfoRow(
+                theme: theme,
+                label: 'Email',
+                value: user?.email ?? 'Not set',
+              ),
+              _InfoRow(
+                theme: theme,
+                label: 'User ID',
+                value: user?.uid ?? 'Unknown',
+              ),
               SizedBox(height: theme.spacingXL),
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
                   showDialog(
                     context: context,
-                    builder: (context) => EditProfileDialog(
-                      currentName: user?.displayName ?? '',
-                    ),
+                    builder: (context) =>
+                        EditProfileDialog(currentName: user?.displayName ?? ''),
                   );
                 },
                 icon: const Icon(Icons.edit_outlined),
@@ -224,16 +234,83 @@ class ProfileScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _LanguageOption(context: context, ref: ref, name: 'English', code: 'en', isSelected: currentLang == 'en'),
-            _LanguageOption(context: context, ref: ref, name: 'Spanish', code: 'es', isSelected: currentLang == 'es'),
-            _LanguageOption(context: context, ref: ref, name: 'French', code: 'fr', isSelected: currentLang == 'fr'),
-            _LanguageOption(context: context, ref: ref, name: 'Hindi', code: 'hi', isSelected: currentLang == 'hi'),
+            _LanguageOption(
+              context: context,
+              ref: ref,
+              name: 'English',
+              code: 'en',
+              isSelected: currentLang == 'en',
+            ),
+            _LanguageOption(
+              context: context,
+              ref: ref,
+              name: 'Spanish',
+              code: 'es',
+              isSelected: currentLang == 'es',
+            ),
+            _LanguageOption(
+              context: context,
+              ref: ref,
+              name: 'French',
+              code: 'fr',
+              isSelected: currentLang == 'fr',
+            ),
+            _LanguageOption(
+              context: context,
+              ref: ref,
+              name: 'Hindi',
+              code: 'hi',
+              isSelected: currentLang == 'hi',
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+  void _showSignOutConfirmation(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context).appTheme;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(theme.radiusLG),
+        ),
+        title: Text(
+          'Sign Out',
+          style: theme.titleLarge.copyWith(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: Colors.black54), // Ensure good visibility
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: theme.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(authProvider.notifier).signOut();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(theme.radiusMD),
+              ),
+            ),
+            child: const Text('Sign Out'),
           ),
         ],
       ),
@@ -267,10 +344,16 @@ class _SmallStatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: theme.titleLarge.copyWith(color: color, fontWeight: FontWeight.bold),
+            style: theme.titleLarge.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 4),
-          Text(label, style: theme.labelSmall.copyWith(color: theme.textSecondary)),
+          Text(
+            label,
+            style: theme.labelSmall.copyWith(color: theme.textSecondary),
+          ),
         ],
       ),
     );
@@ -282,7 +365,11 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({required this.theme, required this.label, required this.value});
+  const _InfoRow({
+    required this.theme,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -291,8 +378,14 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.bodyMedium.copyWith(color: theme.textSecondary)),
-          Text(value, style: theme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: theme.bodyMedium.copyWith(color: theme.textSecondary),
+          ),
+          Text(
+            value,
+            style: theme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -341,7 +434,10 @@ class _LogoutButton extends StatelessWidget {
       icon: Icon(Icons.logout, color: theme.error),
       label: Text(
         'Sign Out',
-        style: theme.bodyLarge.copyWith(color: theme.error, fontWeight: FontWeight.bold),
+        style: theme.bodyLarge.copyWith(
+          color: theme.error,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
@@ -353,4 +449,3 @@ class _LogoutButton extends StatelessWidget {
     );
   }
 }
-

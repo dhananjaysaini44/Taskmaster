@@ -36,9 +36,7 @@ class SettingsSection extends StatelessWidget {
           ),
           child: Material(
             color: Colors.transparent,
-            child: Column(
-              children: items,
-            ),
+            child: Column(children: items),
           ),
         ),
       ],
@@ -68,8 +66,12 @@ class SettingsTile extends StatelessWidget {
       onTap: onTap,
       leading: Icon(icon, color: theme.primary, size: 22),
       title: Text(title, style: theme.bodyMedium),
-      trailing: trailing ?? Icon(Icons.chevron_right, color: theme.textHint, size: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
+      trailing:
+          trailing ??
+          Icon(Icons.chevron_right, color: theme.textHint, size: 20),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radiusLG),
+      ),
     );
   }
 }
@@ -101,7 +103,9 @@ class SettingsToggleTile extends StatelessWidget {
         activeTrackColor: theme.primary.withValues(alpha: 0.5),
         activeThumbColor: theme.primary,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(theme.radiusLG)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radiusLG),
+      ),
     );
   }
 }

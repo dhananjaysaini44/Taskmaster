@@ -11,11 +11,9 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Hive
   await Hive.initFlutter();
@@ -23,12 +21,8 @@ void main() async {
   await Hive.openBox('tasks');
   await Hive.openBox('events');
   await Hive.openBox('authBox'); // For session persistence
-  
-  runApp(
-    const ProviderScope(
-      child: TaskMasterApp(),
-    ),
-  );
+
+  runApp(const ProviderScope(child: TaskMasterApp()));
 }
 
 class TaskMasterApp extends ConsumerWidget {
@@ -40,7 +34,7 @@ class TaskMasterApp extends ConsumerWidget {
     final settingsState = ref.watch(settingsProviderProvider);
 
     return MaterialApp.router(
-      title: 'Task Master',
+      title: 'Taskmaster',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(seedColor: settingsState.seedColor),
       darkTheme: AppTheme.darkTheme(seedColor: settingsState.seedColor),

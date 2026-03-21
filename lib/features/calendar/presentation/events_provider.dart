@@ -24,31 +24,33 @@ class EventsProvider extends _$EventsProvider {
     }
 
     _initialize(uid);
-    
+
     return const AsyncValue.loading();
   }
 
   Future<void> _initialize(String uid) async {
     final boxName = 'events_$uid';
     _box = await Hive.openBox(boxName);
-    
+
     // Ensure we are still matching the uid after async box opening
     if (ref.read(userIdProvider) != uid) return;
-    
+
     final localEvents = _loadEvents();
     state = AsyncValue.data(localEvents);
-    
+
     // Trigger async sync in the background
     final cloudEvents = await _syncWithCloud(uid, localEvents);
-    
+
     // CRITICAL: Only apply if user is still the same
     if (ref.read(userIdProvider) == uid) {
-       state = AsyncValue.data(cloudEvents);
+      state = AsyncValue.data(cloudEvents);
     }
   }
 
-
-  Future<List<CalendarEventModel>> _syncWithCloud(String uid, List<CalendarEventModel> localEvents) async {
+  Future<List<CalendarEventModel>> _syncWithCloud(
+    String uid,
+    List<CalendarEventModel> localEvents,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('users')
@@ -60,7 +62,7 @@ class EventsProvider extends _$EventsProvider {
         final cloudEvents = snapshot.docs
             .map((doc) => CalendarEventModel.fromJson(doc.data()))
             .toList();
-        
+
         // Simple merge: cloud wins
         await _saveEventsLocal(cloudEvents);
         return cloudEvents;
@@ -88,7 +90,11 @@ class EventsProvider extends _$EventsProvider {
     final List<dynamic>? data = _box!.get('items');
     if (data != null) {
       return data
-          .map((item) => CalendarEventModel.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => CalendarEventModel.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList();
     }
     return [];
@@ -156,8 +162,10 @@ class EventsProvider extends _$EventsProvider {
     final index = currentEvents.indexWhere((e) => e.id == id);
     if (index != -1) {
       final updatedEvents = List<CalendarEventModel>.from(currentEvents);
+      final newIsCompleted = !updatedEvents[index].isCompleted;
       updatedEvents[index] = updatedEvents[index].copyWith(
-        isCompleted: !updatedEvents[index].isCompleted,
+        isCompleted: newIsCompleted,
+        completedAt: newIsCompleted ? DateTime.now() : null,
       );
       state = AsyncValue.data(updatedEvents);
       await _saveEventsLocal(updatedEvents);

@@ -10,6 +10,7 @@ class AuthTextField extends StatefulWidget {
   final bool obscureText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final int maxLines;
 
   const AuthTextField({
     super.key,
@@ -21,6 +22,7 @@ class AuthTextField extends StatefulWidget {
     this.obscureText = false,
     this.prefixIcon,
     this.suffixIcon,
+    this.maxLines = 1,
   });
 
   @override
@@ -56,6 +58,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
           validator: widget.validator,
           keyboardType: widget.keyboardType,
           obscureText: _isObscured,
+          maxLines: widget.maxLines,
           style: theme.bodyMedium,
           decoration: InputDecoration(
             hintText: widget.hint,
@@ -79,13 +82,17 @@ class _AuthTextFieldState extends State<AuthTextField> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(theme.radiusMD),
               borderSide: BorderSide(
-                color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent,
+                color:
+                    theme.labelSmall.color?.withValues(alpha: 0.1) ??
+                    Colors.transparent,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(theme.radiusMD),
               borderSide: BorderSide(
-                color: theme.labelSmall.color?.withValues(alpha: 0.1) ?? Colors.transparent,
+                color:
+                    theme.labelSmall.color?.withValues(alpha: 0.1) ??
+                    Colors.transparent,
               ),
             ),
             focusedBorder: OutlineInputBorder(

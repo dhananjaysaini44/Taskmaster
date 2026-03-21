@@ -2,8 +2,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart'
+    as gplus;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../firebase_options.dart';
 import '../domain/app_user.dart';
 
 part 'auth_repository.g.dart';
@@ -11,6 +15,7 @@ part 'auth_repository.g.dart';
 class AuthRepository {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+
   final _authBox = Hive.box('authBox');
   final _controller = StreamController<AppUser?>();
   AppUser? _currentUser;
@@ -63,21 +68,117 @@ class AuthRepository {
   AppUser? get currentUser => _currentUser;
 
   Future<void> signInWithGoogle() async {
-    // Note: Google Sign-In requires extra platform setup (Web/Android/iOS)
-    // For now, this will trigger the real Firebase flow if set up.
-    throw UnimplementedError('Google Sign-In requires additional platform configuration.');
+    try {
+      // Configuration for Google Sign-In
+      // Determine Client ID based on platform
+      String? clientId;
+      String clientSecret = '';
+
+      if (kIsWeb) {
+        // Web usually handles this via Firebase config, but google_sign_in_all_platforms might need it
+        clientId = DefaultFirebaseOptions
+            .web
+            .iosClientId; // Search for web specific if available
+      } else {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            clientId = DefaultFirebaseOptions.ios.iosClientId;
+            break;
+          case TargetPlatform.android:
+            // Android Client ID from google-services.json
+            clientId =
+                '601550085633-oaaj38pchpmt4muirq72dlo4ij6ct2r1.apps.googleusercontent.com';
+            break;
+          case TargetPlatform.windows:
+            // CRITICAL: Windows requires a "Desktop" client ID from Google Cloud Console.
+            // The iOS client ID (default) WILL NOT WORK on Windows.
+            // Placeholder: Replace with your actual Desktop Client ID.
+            clientId =
+                '601550085633-aatmka9c86arn9fb5pirdfuskre2sdqb.apps.googleusercontent.com';
+            clientSecret =
+                ''; // Desktop apps usually need a client secret or specific config
+            break;
+          default:
+            clientId = null;
+        }
+      }
+
+      final googleSignIn = gplus.GoogleSignIn(
+        params: gplus.GoogleSignInParams(
+          clientId: clientId,
+          clientSecret: clientSecret,
+          scopes: ['openid', 'email', 'profile'],
+        ),
+      );
+
+      // Perform sign in
+      final result = await googleSignIn.signIn();
+
+      if (result == null) {
+        // Log this to console to help the user see what's happening
+        debugPrint('Google Sign-In returned null. This usually means:');
+        debugPrint('1. The user cancelled the sign-in.');
+        debugPrint(
+          '2. The Client ID is incorrect for this platform (especially on Windows).',
+        );
+        debugPrint('3. The OAuth consent screen is not configured correctly.');
+        throw Exception(
+          'Google Sign-In was cancelled or failed. Please check the console for details.',
+        );
+      }
+
+      // Obtain tokens
+      final idToken = result.idToken;
+      final accessToken = result.accessToken;
+
+      if (idToken == null) {
+        throw Exception('Failed to obtain ID token from Google');
+      }
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: accessToken,
+        idToken: idToken,
+      );
+
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
+      final User? firebaseUser = userCredential.user;
+
+      if (firebaseUser != null) {
+        final appUser = AppUser(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+        );
+
+        // Save/Update user in Firestore
+        await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .set(appUser.toMap(), SetOptions(merge: true));
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> signInWithEmail(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> signUpWithEmail(String email, String password, String name) async {
+  Future<void> signUpWithEmail(
+    String email,
+    String password,
+    String name,
+  ) async {
     final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    
+
     final user = AppUser(
       uid: credential.user!.uid,
       email: email,
@@ -104,7 +205,9 @@ class AuthRepository {
 
     await Future.wait([
       user.updateDisplayName(name),
-      _firestore.collection('users').doc(user.uid).update({'displayName': name}),
+      _firestore.collection('users').doc(user.uid).update({
+        'displayName': name,
+      }),
     ]);
 
     // Force refresh of current user object

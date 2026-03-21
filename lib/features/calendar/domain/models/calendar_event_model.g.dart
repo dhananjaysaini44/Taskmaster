@@ -17,7 +17,11 @@ _$CalendarEventModelImpl _$$CalendarEventModelImplFromJson(
       category: json['category'] as String? ?? 'event',
       isAllDay: json['isAllDay'] as bool? ?? false,
       isCompleted: json['isCompleted'] as bool? ?? false,
+      completedAt: json['completedAt'] == null
+          ? null
+          : DateTime.parse(json['completedAt'] as String),
       colorValue: (json['colorValue'] as num?)?.toInt(),
+      notes: json['notes'] as String?,
     );
 
 Map<String, dynamic> _$$CalendarEventModelImplToJson(
@@ -31,5 +35,7 @@ Map<String, dynamic> _$$CalendarEventModelImplToJson(
       'category': instance.category,
       'isAllDay': instance.isAllDay,
       'isCompleted': instance.isCompleted,
+      'completedAt': instance.completedAt?.toIso8601String(),
       'colorValue': instance.colorValue,
+      'notes': instance.notes,
     };
