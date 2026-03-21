@@ -32,6 +32,12 @@ The calendar module offers a unified view of time-sensitive events, categorized 
 ### Intelligence Dashboard (Landing Page)
 The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns, immediate access to an expanded list of up to 10 pressing deadlines (including both tasks and events with completion support), and direct navigation to your profile via the interactive user header.
 
+### Native Notification System
+The application now features a robust, system-level reminder engine that ensures you never miss a deadline.
+- **Proactive Reminders**: Automatically schedules high-priority notifications 30 minutes before task due dates and calendar event start times.
+- **Dynamic Synchronization**: Reminders are instantly updated or canceled when tasks are modified, completed, or deleted.
+- **Native Experience**: Utilizes system-level notification channels with custom branding and priority delivery, even on modern Android versions.
+
 ## Technical Implementation
 
 Taskmaster is built upon a modern, reactive tech stack optimized for performance and maintainability:
@@ -44,6 +50,7 @@ Taskmaster is built upon a modern, reactive tech stack optimized for performance
 | **Hive** | Local Database | High-performance NoSQL storage for offline-first data persistence. |
 | **Firebase** | Cloud Infrastructure | Real-time data synchronization, secure cross-device authentication, and cloud-side data isolation. |
 | **GoRouter** | Routing Engine | Declarative navigation and advanced deep-linking capabilities. |
+| **Notifications** | Native Reminders | System-level scheduling with `flutter_local_notifications` and timezone awareness. |
 
 ## Architectural Pattern
 
@@ -65,17 +72,22 @@ taskmaster/
 │   └── firebase_benefits.txt
 ├── lib/
 │   ├── core/           # Shared utilities, routing, and theme definitions
-│   │   ├── router/
-│   │   ├── theme/
-│   │   └── utils/
+│   │   ├── router/     # GoRouter configuration
+│   │   ├── services/   # Notification and system services
+│   │   ├── theme/      # AppTheme and ThemeExtensions
+│   │   └── utils/      # Validators and helpers
 │   ├── features/       # Modular business logic and UI components
+│   │   ├── {feature}/  # Standardized feature structure:
+│   │   │   ├── data/           # Repositories and data sources
+│   │   │   ├── domain/         # Models and business logic
+│   │   │   └── presentation/   # Screens, providers, and widgets
 │   │   ├── auth/       # Authentication, Login, Signup
 │   │   ├── calendar/   # Event scheduling, Focus Flow, Streak tracking
+│   │   ├── home/       # Productivity analytics dashboard
+│   │   ├── mindmap/    # Mind Flow ideation and brainstorming
 │   │   ├── profile/    # User identity and profile settings
 │   │   ├── settings/   # Theme and application configuration
-│   │   ├── splash/     # Cinematic launch experience
-│   │   ├── home/       # Productivity analytics dashboard
-│   │   └── tasks/      # Kanban task management (CRUD, Drag & Drop)
+│   │   └── splash/     # Cinematic launch experience
 │   ├── shared/         # Reusable widgets and UI components
 │   │   └── widgets/
 │   ├── firebase_options.dart
@@ -121,4 +133,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: 1.7.0
+Project Version: 1.8.0

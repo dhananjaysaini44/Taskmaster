@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../domain/task_model.dart';
 import '../task_detail_screen.dart';
-import '../tasks_provider.dart';
+import '../providers/tasks_provider.dart';
 
 class TaskCard extends ConsumerWidget {
   final TaskModel task;

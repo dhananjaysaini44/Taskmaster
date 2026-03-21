@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../auth/presentation/auth_provider.dart';
-import '../../tasks/presentation/tasks_provider.dart';
-import '../../settings/presentation/settings_provider.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../tasks/presentation/providers/tasks_provider.dart';
+import '../../settings/presentation/providers/settings_provider.dart';
 import '../../home/domain/home_stats.dart';
 import './widgets/edit_profile_dialog.dart';
 import './widgets/profile_header.dart';
@@ -34,10 +34,9 @@ class ProfileScreen extends ConsumerWidget {
         child: Column(
           children: [
             SizedBox(
-              height:
-                  MediaQuery.of(context).padding.top +
-                  kToolbarHeight +
-                  theme.spacingLG,
+              height: MediaQuery.of(context).padding.top +
+                  kToolbarHeight -
+                  (theme.spacingLG * 0.75),
             ),
             ProfileHeader(user: user, theme: theme),
             SizedBox(height: theme.spacingXL),

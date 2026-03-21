@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme_extension.dart';
-import '../../../auth/presentation/auth_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class EditProfileDialog extends ConsumerStatefulWidget {
   final String currentName;

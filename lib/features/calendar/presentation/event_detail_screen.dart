@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../domain/models/calendar_event_model.dart';
-import 'events_provider.dart';
+import 'providers/events_provider.dart';
 import 'widgets/add_event_modal.dart';
 
 class EventDetailScreen extends ConsumerWidget {

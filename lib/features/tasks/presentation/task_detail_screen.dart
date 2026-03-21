@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../domain/task_model.dart';
-import 'tasks_provider.dart';
+import 'providers/tasks_provider.dart';
 import 'widgets/add_task_modal.dart';
 
 class TaskDetailScreen extends ConsumerWidget {

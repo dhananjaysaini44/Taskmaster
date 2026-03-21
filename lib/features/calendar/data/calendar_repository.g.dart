@@ -1,27 +1,28 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'events_provider.dart';
+part of 'calendar_repository.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$eventsProviderHash() => r'eefdf24edf025ac10065895602586e995673d9cf';
+String _$calendarRepositoryHash() =>
+    r'8fc5e3c354f95274312fd9da9e049d0055844e1a';
 
-/// See also [EventsProvider].
-@ProviderFor(EventsProvider)
-final eventsProviderProvider = AutoDisposeNotifierProvider<EventsProvider,
-    AsyncValue<List<CalendarEventModel>>>.internal(
-  EventsProvider.new,
-  name: r'eventsProviderProvider',
+/// See also [calendarRepository].
+@ProviderFor(calendarRepository)
+final calendarRepositoryProvider =
+    AutoDisposeFutureProvider<CalendarRepository>.internal(
+  calendarRepository,
+  name: r'calendarRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$eventsProviderHash,
+      : _$calendarRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$EventsProvider
-    = AutoDisposeNotifier<AsyncValue<List<CalendarEventModel>>>;
+typedef CalendarRepositoryRef
+    = AutoDisposeFutureProviderRef<CalendarRepository>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

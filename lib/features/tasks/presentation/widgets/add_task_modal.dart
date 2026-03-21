@@ -5,7 +5,7 @@ import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../shared/widgets/auth_text_field.dart';
 import '../../../../shared/widgets/color_picker_widget.dart';
 import '../../domain/task_model.dart';
-import '../tasks_provider.dart';
+import '../providers/tasks_provider.dart';
 
 class AddTaskModal extends ConsumerStatefulWidget {
   final TaskModel? task;

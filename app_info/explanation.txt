@@ -23,10 +23,9 @@ The project follows a Feature-First Layered Architecture, which organizes code b
 - Data Layer: Handles storage, retrieval, and synchronization. This layer manages the "Hybrid Storage" logic—instantly saving your data locally so the app feels fast, while simultaneously backing it up to the cloud so you never lose it.
 - Presentation Layer: contains the user interface (Screens/Widgets) and the logic that connects the data to what you see on screen.
 - Security Layer: A critical component that ensures your data is locked away in a private "vault" on your device, accessible only when you are signed into your specific account.
-
 Directory Structure:
 - /lib/core: Global configurations like the theme and routing.
-- /lib/features: Individual modules (auth, tasks, calendar, home, profile, splash, settings).
+- /lib/features: Individual modules (auth, tasks, calendar, home, profile, splash, settings, mindmap), each following a consistent /data, /domain, /presentation pattern.
 - /lib/shared: Reusable UI components used across multiple features.
 
 3. DETAILED DIRECTORY & FILE STRUCTURE
@@ -52,6 +51,8 @@ Directory Structure:
 ├── core/ (Application-wide Services)
 │   ├── router/
 │   │   └── app_router.dart: Centralizes all page navigation logic using GoRouter.
+│   ├── services/
+│   │   └── notification_service.dart: The core reminder engine. Manages system-level notification scheduling and delivery.
 │   ├── theme/
 │   │   ├── app_theme.dart: Standard light/dark theme definitions.
 │   │   └── app_theme_extension.dart: Custom UI tokens for "Premium" styling (radii, custom spacing, glassmorphism tokens).
@@ -63,29 +64,36 @@ Directory Structure:
 │   │
 │   ├── auth/ (User Entry & Management)
 │   │   ├── data/auth_repository.dart: Manages session persistence and user profile synchronization with Firestore.
-│   │   └── presentation/login_screen.dart: The center-aligned branding page for user sign-in.
+│   │   ├── domain/app_user.dart: User data model and auth states.
+│   │   └── presentation/providers/auth_provider.dart: Auth state and login/signup logic.
 │   │
 │   ├── tasks/ (Task Management)
 │   │   ├── domain/task_model.dart: Defines the Task properties (id, title, priority, status).
-│   │   ├── data/task_repository.dart: The engine that saves tasks to Hive and syncs them with `users/{uid}/tasks` in Firestore.
-│   │   ├── presentation/tasks_screen.dart: The high-fidelity Kanban board with Drag & Drop support.
-│   │   ├── presentation/tasks_provider.dart: The state bridge between the UI and the repository.
-│   │   └── presentation/widgets/: Sub-widgets like TaskCard and AddTaskModal.
+│   │   ├── data/task_repository.dart: Saves tasks to Hive and syncs with Firestore.
+│   │   ├── presentation/tasks_screen.dart: The high-fidelity Kanban board UI.
+│   │   ├── presentation/providers/tasks_provider.dart: The state bridge for tasks.
+│   │   └── presentation/widgets/: Sub-widgets like TaskCard.
 │   │
 │   ├── calendar/ (Schedule Management)
 │   │   ├── domain/models/calendar_event_model.dart: Logic for events (time, category, color).
-│   │   ├── presentation/calendar_screen.dart: The Calendar UI with Focus Flow dashboard and streak tracking.
-│   │   └── presentation/events_provider.dart: State management for events, includes streak calculation and Firestore sync.
+│   │   ├── data/calendar_repository.dart: Data layer for calendar events.
+│   │   ├── presentation/calendar_screen.dart: The Calendar UI with Focus Flow dashboard.
+│   │   └── presentation/providers/events_provider.dart: State management for events and streaks.
 │   │
 │   ├── home/ (Productivity Analytics)
-│   │   └── presentation/home_screen.dart: The dashboard for tracking completion metrics across devices.
+│   │   ├── domain/home_stats.dart: Stats calculation logic.
+│   │   └── presentation/home_screen.dart: Dashboard metrics and completion trends.
+│   │
+│   ├── mindmap/ (Brainstorming)
+│   │   ├── domain/mind_note.dart: Ideation data models.
+│   │   └── presentation/providers/mind_notes_provider.dart: Mind Flow state logic.
 │   │
 │   ├── profile/ (Settings & Identity)
 │   │   └── presentation/profile_screen.dart: Manage user details and app configuration.
 │   │
 │   └── splash/ (Launch Experience)
-│      ├── presentation/splash_screen.dart: The cinematic 1.5-second opening screen featuring the `logo_splash.png` with a zoom-in animation on theme-aware solid backgrounds.
-│       └── presentation/splash_provider.dart: Controls the timing and redirection of the splash flow.
+│      ├── presentation/splash_screen.dart: Cinematic opening screen.
+│      └── presentation/providers/splash_provider.dart: Controls splash flow timing.
 │
 └── shared/ (Universal Components)
     └── widgets/
@@ -134,6 +142,12 @@ Manage your identity and application environment.
 - Identity Management: The new Profile Suite allows users to update their Display Name and secure their account with Password modifications.
 - Sync Status: Provides transparency on the synchronization state between the local vault and the cloud.
 - Interface Customization: Switch between Light and Dark mode with a seamless "Ambient Background" transition and language selection.
+
+G. Native Notification System
+A proactive reminder engine that keeps you on track.
+- Lead Time: Sends reminders exactly 30 minutes before a task's deadline or an event's start.
+- Smart Lifecycle: Notifications are automatically canceled if a task is deleted or marked as completed.
+- Persistence: Uses advanced alarm scheduling to ensure reminders work even after a device reboot.
 
 5. IMPORTANT CODE SNIPPETS & PATTERNS
 
@@ -188,6 +202,22 @@ class AmbientBackground extends StatelessWidget {
 }
 ```
 
+}
+
+5. NATIVE NOTIFICATION SYSTEM & SCHEDULING
+The system implements a precise scheduling strategy using `flutter_local_notifications` and `timezone` to ensure reminders are accurate across different regions.
+
+A. Scheduling Logic
+When a task or event is added/updated, the application calculates the trigger time: `ScheduledTime - 30 Minutes`. If this calculated time is in the past, no notification is scheduled.
+
+B. Lifecycle Management
+- **Creation**: Scheduling occurs immediately upon successful local save (Hive).
+- **Completion**: Marking a task/event as done triggers `cancelNotification(id)`, removing the pending alert from the system tray.
+- **Update**: Modern "Upsert" logic cancels any existing notification for that ID before scheduling a new one based on the updated time.
+
+C. Platform Reliability
+The system is configured with high-priority channels and `SCHEDULE_EXACT_ALARM` permissions to ensure timely delivery on newer versions of Android where battery optimizations often delay background tasks.
+
 6. GETTING STARTED
 ------------------
 To run the project locally:
@@ -197,6 +227,6 @@ To run the project locally:
 4. Launch via `flutter run`.
 
 ---
-Current Project State: 1.7.0 - Advanced Kanban & Focus Flow Release
+Current Project State: 1.8.0 - Native Reminders & Mind Flow Release
 Documentation maintained by the Taskmaster Engineering Team.
 Dhananjay Saini (GitHub: @dhananjaysaini44)

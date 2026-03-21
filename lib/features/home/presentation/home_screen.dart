@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../tasks/presentation/tasks_provider.dart';
+import '../../tasks/presentation/providers/tasks_provider.dart';
 import '../../tasks/domain/task_model.dart';
 import '../../calendar/domain/models/calendar_event_model.dart';
-import '../../calendar/presentation/events_provider.dart';
+import '../../calendar/presentation/providers/events_provider.dart';
 import '../../tasks/presentation/widgets/add_task_modal.dart';
-import '../../auth/presentation/auth_provider.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import '../domain/home_stats.dart';
 import './widgets/greeting_widget.dart';
 import './widgets/task_completion_chart.dart';

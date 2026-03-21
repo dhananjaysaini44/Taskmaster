@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../core/utils/validators.dart';
 import '../../../shared/widgets/auth_text_field.dart';
-import '../presentation/auth_provider.dart';
+import 'providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

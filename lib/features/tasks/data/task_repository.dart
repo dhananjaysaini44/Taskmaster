@@ -3,8 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../domain/task_model.dart';
+import '../../../core/services/notification_service.dart';
 
-import '../../auth/presentation/user_id_provider.dart';
+import '../../auth/presentation/providers/user_id_provider.dart';
 
 part 'task_repository.g.dart';
 
@@ -18,6 +19,29 @@ class TaskRepository {
   TaskRepository({required this.uid, required this._box}) {
     _loadTasks();
     _syncWithCloud();
+    _rescheduleAllNotifications();
+  }
+
+  void _rescheduleAllNotifications() {
+    for (final task in _tasks) {
+      if (task.status != TaskStatus.completed) {
+        _scheduleTaskNotification(task);
+      }
+    }
+  }
+
+  Future<void> _scheduleTaskNotification(TaskModel task) async {
+    final id = task.id.hashCode;
+    await NotificationService().scheduleNotification(
+      id: id,
+      title: 'Task Reminder',
+      body: 'Upcoming task: ${task.title}',
+      scheduledDate: task.dueDate,
+    );
+  }
+
+  Future<void> _cancelTaskNotification(String taskId) async {
+    await NotificationService().cancelNotification(taskId.hashCode);
   }
 
   void _loadTasks() {
@@ -138,6 +162,7 @@ class TaskRepository {
     _tasks.add(newTask);
     await _saveTasksLocal();
     await _saveTaskToCloud(newTask);
+    await _scheduleTaskNotification(newTask);
     _controller.add(List.from(_tasks));
   }
 
@@ -148,6 +173,11 @@ class TaskRepository {
         status: status,
         completedAt: status == TaskStatus.completed ? DateTime.now() : null,
       );
+      if (status == TaskStatus.completed) {
+        await _cancelTaskNotification(id);
+      } else {
+        await _scheduleTaskNotification(_tasks[index]);
+      }
       await _saveTasksLocal();
       await _saveTaskToCloud(_tasks[index]);
       _controller.add(List.from(_tasks));
@@ -166,6 +196,7 @@ class TaskRepository {
 
   Future<void> deleteTask(String id) async {
     _tasks.removeWhere((t) => t.id == id);
+    await _cancelTaskNotification(id);
     await _saveTasksLocal();
     await _deleteTaskFromCloud(id);
     _controller.add(List.from(_tasks));
@@ -190,6 +221,11 @@ class TaskRepository {
     final index = _tasks.indexWhere((t) => t.id == task.id);
     if (index != -1) {
       _tasks[index] = task;
+      if (task.status != TaskStatus.completed) {
+        await _scheduleTaskNotification(task);
+      } else {
+        await _cancelTaskNotification(task.id);
+      }
       await _saveTasksLocal();
       await _saveTaskToCloud(task);
       _controller.add(List.from(_tasks));

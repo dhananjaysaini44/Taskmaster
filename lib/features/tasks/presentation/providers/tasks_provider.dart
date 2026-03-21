@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../data/task_repository.dart';
-import '../domain/task_model.dart';
+import '../../data/task_repository.dart';
+import '../../domain/task_model.dart';
 
 part 'tasks_provider.g.dart';
 

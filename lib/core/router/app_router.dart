@@ -3,16 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../features/auth/presentation/auth_provider.dart';
-import '../../features/auth/presentation/splash_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/splash/presentation/providers/splash_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
-import '../../features/auth/presentation/splash_screen.dart';
+import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/mindmap/presentation/mind_map_screen.dart';
 import '../../shared/widgets/main_app_shell.dart';
 
 part 'app_router.g.dart';
@@ -115,6 +116,13 @@ GoRouter appRouter(AppRouterRef ref) {
             path: '/calendar',
             pageBuilder: (context, state) => FadeTransitionPage(
               child: const CalendarScreen(),
+              key: state.pageKey,
+            ),
+          ),
+          GoRoute(
+            path: '/mindmap',
+            pageBuilder: (context, state) => FadeTransitionPage(
+              child: const MindMapScreen(),
               key: state.pageKey,
             ),
           ),

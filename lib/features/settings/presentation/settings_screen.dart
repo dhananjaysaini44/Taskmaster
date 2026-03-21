@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
-import '../../../core/utils/system_info.dart';
 import '../../../shared/widgets/color_picker_widget.dart';
-import '../../auth/presentation/auth_provider.dart';
-import 'settings_provider.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import 'providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -21,20 +20,18 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.background,
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       body: ListView(
         padding: EdgeInsets.only(
           left: theme.spacingLG,
           right: theme.spacingLG,
-          top:
-              MediaQuery.of(context).padding.top +
-              kToolbarHeight +
-              theme.spacingMD,
+          top: MediaQuery.of(context).padding.top + theme.spacingMD,
           bottom: 100,
         ),
         children: [
+          _buildCompactHeader(context, theme),
           _buildSectionHeader(theme, 'Appearance'),
-          SizedBox(height: theme.spacingMD),
+          SizedBox(height: theme.spacingXS),
           _buildThemeSelector(theme, settingsState, settingsNotifier),
           SizedBox(height: theme.spacingLG),
           _buildSectionHeader(theme, 'Brand Color'),
@@ -74,6 +71,33 @@ class SettingsScreen extends ConsumerWidget {
           _buildSystemInfoCard(theme, size),
           SizedBox(height: theme.spacingXL),
           _buildAccountSection(context, ref, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactHeader(BuildContext context, AppThemeExtension theme) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: theme.spacingLG),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
+            tooltip: 'Back',
+          ),
+          SizedBox(width: theme.spacingSM),
+          Text(
+            'SETTINGS',
+            style: theme.titleLarge.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              fontSize: 20,
+            ),
+          ),
         ],
       ),
     );
@@ -165,7 +189,7 @@ class SettingsScreen extends ConsumerWidget {
             '${size.width.toInt()} x ${size.height.toInt()}',
           ),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Version', '1.7.0'),
+          _buildInfoRow(theme, 'Version', '1.8.0'),
         ],
       ),
     );

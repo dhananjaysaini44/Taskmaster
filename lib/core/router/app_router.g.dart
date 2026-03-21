@@ -22,7 +22,7 @@ final routerRefreshProvider =
 );
 
 typedef RouterRefreshRef = AutoDisposeProviderRef<RouterRefreshNotifier>;
-String _$appRouterHash() => r'1a0b73f2aa9adcab421c268c96e1228c018c9087';
+String _$appRouterHash() => r'3179ff3e3b6f5b59af2409dea235143e15671b64';
 
 /// See also [appRouter].
 @ProviderFor(appRouter)

@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../domain/task_model.dart';
-import '../../calendar/presentation/events_provider.dart';
+import '../../calendar/presentation/providers/events_provider.dart';
 import '../../calendar/domain/models/calendar_event_model.dart';
-import 'tasks_provider.dart';
+import 'providers/tasks_provider.dart';
 import 'widgets/task_card.dart';
 import 'widgets/add_task_modal.dart';
 

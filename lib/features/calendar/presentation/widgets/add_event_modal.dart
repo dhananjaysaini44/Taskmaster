@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/theme/app_theme_extension.dart';
 import '../../../../shared/widgets/color_picker_widget.dart';
 import '../../domain/models/calendar_event_model.dart';
-import '../events_provider.dart';
+import '../providers/events_provider.dart';
 
 class AddEventModal extends ConsumerStatefulWidget {
   final CalendarEventModel? event;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme_extension.dart';
 
@@ -40,16 +39,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Taskmaster',
-                  style: GoogleFonts.goldman(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primary,
-                    letterSpacing: 1.2,
-                  ),
-                ),
+                const SizedBox(height: 4),
               ],
             ),
           ),
@@ -85,6 +75,15 @@ class AppDrawer extends StatelessWidget {
                   theme: theme,
                 ),
                 _DrawerTile(
+                  icon: Icons.hub_outlined,
+                  label: 'Mind Flow',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.go('/mindmap');
+                  },
+                  theme: theme,
+                ),
+                _DrawerTile(
                   icon: Icons.person_outline,
                   label: 'Profile',
                   onTap: () {
@@ -99,7 +98,7 @@ class AppDrawer extends StatelessWidget {
                   label: 'Settings',
                   onTap: () {
                     Navigator.pop(context);
-                    context.go('/settings');
+                    context.push('/settings');
                   },
                   theme: theme,
                 ),
@@ -109,7 +108,7 @@ class AppDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Text(
-              'v1.0.0',
+              'v1.8.0',
               style: theme.labelSmall.copyWith(color: theme.textHint),
             ),
           ),
