@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -156,344 +157,355 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     final isLoading = ref.watch(authProvider).isLoading;
 
-    return Scaffold(
-      backgroundColor: theme.surface,
-      body: Stack(
-        children: [
-          // Background Blurs
-          Positioned(
-            top: -100,
-            right: -100,
-            child: _BlurCircle(
-              color: theme.primary.withValues(alpha: isDark ? 0.15 : 0.1),
-              size: 400,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: theme.surface,
+        body: Stack(
+          children: [
+            // Background Blurs
+            Positioned(
+              top: -100,
+              right: -100,
+              child: _BlurCircle(
+                color: theme.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+                size: 400,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -100,
-            child: _BlurCircle(
-              color: isDark
-                  ? const Color(0xFF6366F1).withValues(alpha: 0.15)
-                  : const Color(0xFF818CF8).withValues(alpha: 0.1),
-              size: 350,
+            Positioned(
+              bottom: -50,
+              left: -100,
+              child: _BlurCircle(
+                color: isDark
+                    ? const Color(0xFF6366F1).withValues(alpha: 0.15)
+                    : const Color(0xFF818CF8).withValues(alpha: 0.1),
+                size: 350,
+              ),
             ),
-          ),
 
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: theme.spacingXL,
-                  vertical: theme.spacingLG,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo
-                      _animateWidget(
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            'assets/logo.png',
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        0,
-                      ),
-                      const SizedBox(height: 3),
-
-                      // Welcome Text
-                      _animateWidget(
-                        Text(
-                          'Taskmaster',
-                          style: GoogleFonts.goldman(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -1.0,
-                            color: theme.textPrimary,
-                          ),
-                        ),
-                        1,
-                      ),
-                      SizedBox(height: theme.spacingMD),
-
-                      // Form Container
-                      _animateWidget(
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: theme.surface.withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color:
-                                  theme.labelSmall.color?.withValues(
-                                    alpha: 0.1,
-                                  ) ??
-                                  Colors.grey.withValues(alpha: 0.1),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: theme.spacingXL,
+                    vertical: theme.spacingLG,
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo
+                        _animateWidget(
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.asset(
+                              'assets/logo.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.contain,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
+                          ),
+                          0,
+                        ),
+                        const SizedBox(height: 3),
+
+                        // Welcome Text
+                        _animateWidget(
+                          Text(
+                            'Taskmaster',
+                            style: GoogleFonts.goldman(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -1.0,
+                              color: theme.textPrimary,
+                            ),
+                          ),
+                          1,
+                        ),
+                        SizedBox(height: theme.spacingMD),
+
+                        // Form Container
+                        _animateWidget(
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: theme.surface.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color:
+                                    theme.labelSmall.color?.withValues(
+                                      alpha: 0.1,
+                                    ) ??
+                                    Colors.grey.withValues(alpha: 0.1),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome back',
+                                  style: GoogleFonts.audiowide(
+                                    fontSize: 28,
+                                    color: theme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Please enter your details to continue',
+                                  style: theme.bodyMedium.copyWith(
+                                    color: theme.bodyMedium.color?.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Divider(
+                                  color: theme.labelSmall.color?.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+
+                                // Email Field
+                                AuthTextField(
+                                  label: 'Email Address',
+                                  hint: 'your@email.com',
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: Validators.email,
+                                  prefixIcon: Icon(
+                                    Icons.alternate_email_rounded,
+                                    size: 20,
+                                    color: theme.primary,
+                                  ),
+                                ),
+                                SizedBox(height: theme.spacingLG),
+
+                                // Password Field
+                                AuthTextField(
+                                  label: 'Password',
+                                  hint: '••••••••',
+                                  controller: _passwordController,
+                                  obscureText: true,
+                                  validator: Validators.password,
+                                  prefixIcon: Icon(
+                                    Icons.lock_person_outlined,
+                                    size: 20,
+                                    color: theme.primary,
+                                  ),
+                                ),
+
+                                // Options Row
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: Checkbox(
+                                              value: _keepLoggedIn,
+                                              onChanged: (v) => setState(
+                                                () => _keepLoggedIn = v ?? false,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              activeColor: theme.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Remember me',
+                                            style: theme.labelSmall.copyWith(
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TextButton(
+                                        onPressed: _resetPassword,
+                                        child: Text(
+                                          'Forgot Password?',
+                                          style: theme.labelSmall.copyWith(
+                                            color: theme.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: theme.spacingXL),
+
+                                // Login Button
+                                GestureDetector(
+                                  onTap: isLoading ? null : _login,
+                                  child: Container(
+                                    height: 56,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      gradient: theme.primaryGradient,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: theme.primary.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: isLoading
+                                        ? const SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : Text(
+                                            'Sign In',
+                                            style: theme.titleMedium.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          2,
+                        ),
+                        SizedBox(height: theme.spacingXL),
+
+                        // Divider
+                        _animateWidget(
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Divider(
+                                  color: theme.labelSmall.color?.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  'or continue with',
+                                  style: theme.labelSmall.copyWith(
+                                    color: theme.labelSmall.color?.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: theme.labelSmall.color?.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          7,
+                        ),
+                        SizedBox(height: theme.spacingXL),
+
+                        // Google Login
+                        _animateWidget(
+                          OutlinedButton(
+                            onPressed: isLoading ? null : _signInWithGoogle,
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              side: BorderSide(
+                                color:
+                                    theme.labelSmall.color?.withValues(
+                                      alpha: 0.1,
+                                    ) ??
+                                    Colors.grey,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.g_mobiledata, size: 32),
+                                const SizedBox(width: 8),
+                                const Text('Google Account'),
+                              ],
+                            ),
+                          ),
+                          8,
+                        ),
+                        SizedBox(height: theme.spacingXL),
+
+                        // Footer
+                        _animateWidget(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Welcome back',
-                                style: GoogleFonts.audiowide(
-                                  fontSize: 28,
-                                  color: theme.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Please enter your details to continue',
-                                style: theme.bodyMedium.copyWith(
-                                  color: theme.bodyMedium.color?.withValues(
+                                "Don't have an account?",
+                                style: theme.labelSmall.copyWith(
+                                  color: theme.labelSmall.color?.withValues(
                                     alpha: 0.6,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              Divider(
-                                color: theme.labelSmall.color?.withValues(
-                                  alpha: 0.1,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-
-                              // Email Field
-                              AuthTextField(
-                                label: 'Email Address',
-                                hint: 'your@email.com',
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: Validators.email,
-                                prefixIcon: Icon(
-                                  Icons.alternate_email_rounded,
-                                  size: 20,
-                                  color: theme.primary,
-                                ),
-                              ),
-                              SizedBox(height: theme.spacingLG),
-
-                              // Password Field
-                              AuthTextField(
-                                label: 'Password',
-                                hint: '••••••••',
-                                controller: _passwordController,
-                                obscureText: true,
-                                validator: Validators.password,
-                                prefixIcon: Icon(
-                                  Icons.lock_person_outlined,
-                                  size: 20,
-                                  color: theme.primary,
-                                ),
-                              ),
-
-                              // Options Row
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        SizedBox(
-                                          height: 24,
-                                          width: 24,
-                                          child: Checkbox(
-                                            value: _keepLoggedIn,
-                                            onChanged: (v) => setState(
-                                              () => _keepLoggedIn = v ?? false,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            activeColor: theme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Remember me',
-                                          style: theme.labelSmall.copyWith(
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    TextButton(
-                                      onPressed: _resetPassword,
-                                      child: Text(
-                                        'Forgot Password?',
-                                        style: theme.labelSmall.copyWith(
-                                          color: theme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: theme.spacingXL),
-
-                              // Login Button
-                              GestureDetector(
-                                onTap: isLoading ? null : _login,
-                                child: Container(
-                                  height: 56,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    gradient: theme.primaryGradient,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: theme.primary.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
+                              TextButton(
+                                onPressed: () => context.go('/signup'),
+                                child: Text(
+                                  'Create Free Account',
+                                  style: theme.labelSmall.copyWith(
+                                    color: theme.primary,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  alignment: Alignment.center,
-                                  child: isLoading
-                                      ? const SizedBox(
-                                          height: 24,
-                                          width: 24,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : Text(
-                                          'Sign In',
-                                          style: theme.titleMedium.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
                                 ),
                               ),
                             ],
                           ),
+                          9,
                         ),
-                        2,
-                      ),
-                      SizedBox(height: theme.spacingXL),
-
-                      // Divider
-                      _animateWidget(
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: theme.labelSmall.color?.withValues(
-                                  alpha: 0.1,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                'or continue with',
-                                style: theme.labelSmall.copyWith(
-                                  color: theme.labelSmall.color?.withValues(
-                                    alpha: 0.4,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: theme.labelSmall.color?.withValues(
-                                  alpha: 0.1,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        7,
-                      ),
-                      SizedBox(height: theme.spacingXL),
-
-                      // Google Login
-                      _animateWidget(
-                        OutlinedButton(
-                          onPressed: isLoading ? null : _signInWithGoogle,
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 56),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            side: BorderSide(
-                              color:
-                                  theme.labelSmall.color?.withValues(
-                                    alpha: 0.1,
-                                  ) ??
-                                  Colors.grey,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.g_mobiledata, size: 32),
-                              const SizedBox(width: 8),
-                              const Text('Google Account'),
-                            ],
-                          ),
-                        ),
-                        8,
-                      ),
-                      SizedBox(height: theme.spacingXL),
-
-                      // Footer
-                      _animateWidget(
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Don't have an account?",
-                              style: theme.labelSmall.copyWith(
-                                color: theme.labelSmall.color?.withValues(
-                                  alpha: 0.6,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => context.go('/signup'),
-                              child: Text(
-                                'Create Free Account',
-                                style: theme.labelSmall.copyWith(
-                                  color: theme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        9,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

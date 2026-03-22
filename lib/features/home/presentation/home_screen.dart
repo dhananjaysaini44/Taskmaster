@@ -36,23 +36,19 @@ class _HomeScreenContent extends ConsumerWidget {
     final tasksAsync = ref.watch(tasksProviderProvider);
     final eventsAsync = ref.watch(eventsProviderProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      body: tasksAsync.when(
-        data: (tasks) => eventsAsync.when(
-          data: (events) => _HomeBody(
-            tasks: tasks,
-            events: events,
-            theme: theme,
-            user: user,
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Error loading events: $error')),
+    return tasksAsync.when(
+      data: (tasks) => eventsAsync.when(
+        data: (events) => _HomeBody(
+          tasks: tasks,
+          events: events,
+          theme: theme,
+          user: user,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error loading tasks: $error')),
+        error: (error, _) => Center(child: Text('Error loading events: $error')),
       ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Error loading tasks: $error')),
     );
   }
 }
@@ -112,60 +108,63 @@ class _HomeBody extends ConsumerWidget {
 
     final displayItems = combinedUpcoming.take(10).toList();
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: theme.spacingSM * 2.2),
-          GreetingWidget(
-            userName: user?.displayName ?? 'User',
-            theme: theme,
-          ),
-          SizedBox(height: theme.spacingMD),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 600;
-              final charts = [
-                SizedBox(
-                  height: 180,
-                  child: TaskCompletionChart(
-                    theme: theme,
-                    completed: stats.completedTasks,
-                    pending: stats.totalTasks - stats.completedTasks,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: theme.spacingSM * 2.2),
+            GreetingWidget(
+              userName: user?.displayName ?? 'User',
+              theme: theme,
+            ),
+            SizedBox(height: theme.spacingMD),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 600;
+                final charts = [
+                  SizedBox(
+                    height: 180,
+                    child: TaskCompletionChart(
+                      theme: theme,
+                      completed: stats.completedTasks,
+                      pending: stats.totalTasks - stats.completedTasks,
+                    ),
                   ),
-                ),
-                SizedBox(height: theme.spacingMD),
-                SizedBox(
-                  height: 180,
-                  child: ProductivityChart(
-                    theme: theme,
-                    dailyCompletions: stats.dailyProductivity,
+                  SizedBox(height: theme.spacingMD),
+                  SizedBox(
+                    height: 180,
+                    child: ProductivityChart(
+                      theme: theme,
+                      dailyCompletions: stats.dailyProductivity,
+                    ),
                   ),
-                ),
-              ];
+                ];
 
-              if (isWide) {
-                return Row(
-                  children: [
-                    Expanded(child: charts[0]),
-                    SizedBox(width: theme.spacingMD),
-                    Expanded(child: charts[2]), // items[1] is spacing
-                  ],
-                );
-              } else {
-                return Column(children: charts);
-              }
-            },
-          ),
-          SizedBox(height: theme.spacingMD),
-          _UpcomingSection(
-            displayItems: displayItems,
-            theme: theme,
-            onAddTask: () => _showAddTask(context),
-          ),
-          const SizedBox(height: 100),
-        ],
+                if (isWide) {
+                  return Row(
+                    children: [
+                      Expanded(child: charts[0]),
+                      SizedBox(width: theme.spacingMD),
+                      Expanded(child: charts[2]), // items[1] is spacing
+                    ],
+                  );
+                } else {
+                  return Column(children: charts);
+                }
+              },
+            ),
+            SizedBox(height: theme.spacingMD),
+            _UpcomingSection(
+              displayItems: displayItems,
+              theme: theme,
+              onAddTask: () => _showAddTask(context),
+            ),
+            const SizedBox(height: 100),
+          ],
+        ),
       ),
     );
   }

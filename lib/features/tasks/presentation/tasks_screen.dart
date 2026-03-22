@@ -28,7 +28,7 @@ class TasksScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: MediaQuery.of(context).padding.top + 12),
+                const SizedBox(height: 12),
                 const _TasksHeader(),
                 const SizedBox(height: 16),
                 _KanbanLayout(tasks: tasks),
@@ -42,7 +42,15 @@ class TasksScreen extends ConsumerWidget {
         loading: () => _TasksLoadingState(theme: theme),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
-      floatingActionButton: const _AddTaskFab(),
+      floatingActionButton: AddTaskFab(
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const AddTaskModal(),
+        ),
+        theme: theme,
+      ),
     );
   }
 }
@@ -470,19 +478,20 @@ class _TasksLoadingState extends StatelessWidget {
   }
 }
 
-class _AddTaskFab extends ConsumerWidget {
-  const _AddTaskFab();
+class AddTaskFab extends StatelessWidget {
+  final VoidCallback onPressed;
+  final AppThemeExtension theme;
+
+  const AddTaskFab({
+    super.key,
+    required this.onPressed,
+    required this.theme,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context).appTheme;
+  Widget build(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () => showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => const AddTaskModal(),
-      ),
+      onPressed: onPressed,
       backgroundColor: theme.primary,
       child: const Icon(Icons.add, color: Colors.white),
     );

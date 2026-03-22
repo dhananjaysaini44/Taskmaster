@@ -27,17 +27,12 @@ class ProfileScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Required for ambient background
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
         child: Column(
           children: [
-            SizedBox(
-              height: MediaQuery.of(context).padding.top +
-                  kToolbarHeight -
-                  (theme.spacingLG * 0.75),
-            ),
+            SizedBox(height: theme.spacingLG),
             ProfileHeader(user: user, theme: theme),
             SizedBox(height: theme.spacingXL),
             tasksAsync.when(

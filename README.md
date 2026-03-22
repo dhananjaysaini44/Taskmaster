@@ -16,7 +16,7 @@ The application is engineered for users who require a reliable and visually refi
 
 ## Principal Features
 
-Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features a cinematic 1.5-second splash experience with a zoom-in branding animation on theme-aware solid backgrounds (Deep Black/Pure White) and custom login backgrounds that intelligently transition between light and dark modes, reducing visual fatigue and enhancing engagement.
+Taskmaster implements a contemporary design language characterized by glassmorphism and dynamic gradients. The user interface features a cinematic 1.5-second splash experience with a zoom-in branding animation on theme-aware solid backgrounds (Deep Black/Pure White). We utilize a **standardized "Ambient" design language** across all features, ensuring that complex interactions like adding tasks and events share a common rhythm, radii, and visual weighting for a premium, predictable user experience.
 
 ### Hybrid Synchronization Engine
 The system utilizes a sophisticated dual-layered persistence and isolation strategy:
@@ -29,14 +29,17 @@ Users can now maintain their identity directly within the application. The new p
 ### Integrated Scheduling
 The calendar module offers a unified view of time-sensitive events, categorized by professional and personal domains. It features real-time synchronization, ensuring that schedules are always current across all logged-in instances.
 
+### Mind Flow (Ideation)
+The Mind Map suite provides a frictionless canvas for digital brainstorming. It features a high-fidelity text-based organization system with a dynamic "Ambient" layout, allowing users to capture and organize thoughts with theme-aware styling and persistence.
+
 ### Intelligence Dashboard (Landing Page)
 The Home screen serves as the primary landing experience, providing dynamic dashboards that visualize completion metrics and performance trends. It offers actionable insights into productivity patterns, immediate access to an expanded list of up to 10 pressing deadlines (including both tasks and events with completion support), and direct navigation to your profile via the interactive user header.
 
 ### Native Notification System
-The application now features a robust, system-level reminder engine that ensures you never miss a deadline.
+The application features a robust, system-level reminder engine that ensures you never miss a deadline.
 - **Proactive Reminders**: Automatically schedules high-priority notifications 30 minutes before task due dates and calendar event start times.
 - **Dynamic Synchronization**: Reminders are instantly updated or canceled when tasks are modified, completed, or deleted.
-- **Native Experience**: Utilizes system-level notification channels with custom branding and priority delivery, even on modern Android versions.
+- **Native Experience**: Utilizes system-level notification channels with custom branding and priority delivery.
 
 ## Technical Implementation
 
@@ -58,6 +61,12 @@ The project follows a Feature-First Layered Architecture, promoting high modular
 - **Domain Layer**: Core business models and logic.
 - **Data Layer**: Repository implementations handling the hybrid storage bridge.
 - **Presentation Layer**: UI components and Riverpod providers.
+
+### Unified Navigation Shell
+The application utilizes a **single Global Scaffold** strategy (`MainAppShell`) to manage cross-feature navigation. This architecture provides several technical advantages:
+- **Shared State**: Persistent Sidebar (Drawer) state and Bottom Navigation synchronization.
+- **Optimized Rendering**: Leverages `PageView` with `Offstage` preservation for sub-routes, ensuring the `ShellNavigator` remains in the widget tree to prevent lifecycle crashes.
+- **Refined Navigation Stability**: Implements `PopScope` to prioritize dismissing transient UI elements (Drawers, Modals) and utilizes a **custom Tab History Tracking** system to provide intuitive back-navigation between features before exiting the application.
 
 ## Project Structure
 
@@ -133,4 +142,4 @@ For an in-depth technical analysis, directory mapping, and detailed screen funct
 ---
 
 Maintainer: [Dhananjay Saini](https://github.com/dhananjaysaini44)  
-Project Version: 1.8.0
+Project Version: 1.8.1

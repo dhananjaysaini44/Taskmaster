@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'router_keys.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/splash/presentation/providers/splash_provider.dart';
@@ -33,6 +34,7 @@ GoRouter appRouter(AppRouterRef ref) {
   final refreshListenable = ref.watch(routerRefreshProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: refreshListenable,
     redirect: (context, state) {
@@ -96,6 +98,7 @@ GoRouter appRouter(AppRouterRef ref) {
             FadeTransitionPage(child: const SignupScreen(), key: state.pageKey),
       ),
       ShellRoute(
+        navigatorKey: shellNavigatorKey,
         builder: (context, state, child) => MainAppShell(child: child),
         routes: [
           GoRoute(

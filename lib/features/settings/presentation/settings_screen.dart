@@ -189,7 +189,7 @@ class SettingsScreen extends ConsumerWidget {
             '${size.width.toInt()} x ${size.height.toInt()}',
           ),
           _buildDivider(theme),
-          _buildInfoRow(theme, 'Version', '1.8.0'),
+          _buildInfoRow(theme, 'Version', '1.8.1'),
         ],
       ),
     );

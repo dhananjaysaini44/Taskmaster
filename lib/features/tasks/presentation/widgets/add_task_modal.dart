@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme_extension.dart';
-import '../../../../shared/widgets/auth_text_field.dart';
 import '../../../../shared/widgets/color_picker_widget.dart';
 import '../../domain/task_model.dart';
 import '../providers/tasks_provider.dart';
@@ -135,24 +134,31 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).appTheme;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        // Logic for specific back handling if needed, though canPop: true is fine here
+        // as we just want normal pop behavior for the modal.
+      },
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) {
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Container(
+              decoration: BoxDecoration(
+                color: theme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+                border: Border.all(color: theme.borderSecondary, width: 1),
               ),
-              border: Border.all(color: theme.borderSecondary, width: 1.5),
-            ),
               child: SingleChildScrollView(
                 controller: scrollController,
-                padding: EdgeInsets.all(theme.spacingLG),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -160,7 +166,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          widget.task != null ? 'Edit Task' : 'New Task',
+                          widget.task != null ? 'Edit Task' : 'Add New Tasks',
                           style: theme.displayLarge.copyWith(fontSize: 28),
                         ),
                         IconButton(
@@ -169,28 +175,48 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         ),
                       ],
                     ),
-                    SizedBox(height: theme.spacingXL),
-                    AuthTextField(
-                      label: 'Task Title',
-                      hint: 'What needs to be done?',
+                    const SizedBox(height: 24),
+                    TextField(
                       controller: _titleController,
-                      prefixIcon: Icon(
-                        Icons.edit_note_rounded,
-                        color: theme.primary,
+                      style: TextStyle(color: theme.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Task Title',
+                        hintStyle: TextStyle(color: theme.textHint),
+                        filled: true,
+                        fillColor: theme.background,
+                        prefixIcon: Icon(Icons.edit_note_rounded, color: theme.primary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: theme.borderSecondary),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: theme.borderSecondary),
+                        ),
                       ),
                     ),
-                    SizedBox(height: theme.spacingLG),
-                    AuthTextField(
-                      label: 'Notes',
-                      hint: 'Add more details...',
+                    const SizedBox(height: 16),
+                    TextField(
                       controller: _notesController,
+                      style: TextStyle(color: theme.textPrimary),
                       maxLines: 3,
-                      prefixIcon: Icon(
-                        Icons.description_rounded,
-                        color: theme.primary,
+                      decoration: InputDecoration(
+                        hintText: 'Notes',
+                        hintStyle: TextStyle(color: theme.textHint),
+                        filled: true,
+                        fillColor: theme.background,
+                        prefixIcon: Icon(Icons.description_rounded, color: theme.primary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: theme.borderSecondary),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: theme.borderSecondary),
+                        ),
                       ),
                     ),
-                    SizedBox(height: theme.spacingLG),
+                    const SizedBox(height: 24),
 
                     // Due Date Picker
                     Text(
@@ -208,7 +234,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.surface,
+                          color: theme.background,
                           borderRadius: BorderRadius.circular(theme.radiusMD),
                           border: Border.all(color: theme.borderSecondary),
                         ),
@@ -233,7 +259,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                       ),
                     ),
 
-                    SizedBox(height: theme.spacingLG),
+                    const SizedBox(height: 24),
                     Text(
                       'Priority',
                       style: theme.labelSmall.copyWith(
@@ -269,7 +295,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         selectedForegroundColor: theme.surface,
                       ),
                     ),
-                    SizedBox(height: theme.spacingLG),
+                    const SizedBox(height: 24),
                     Text(
                       'Accent Color',
                       style: theme.labelSmall.copyWith(
@@ -289,36 +315,37 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                       onChanged: (color) =>
                           setState(() => _selectedColor = color),
                     ),
-                    SizedBox(height: theme.spacingXL),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primary,
-                        foregroundColor: theme.surface,
-                        padding: EdgeInsets.symmetric(
-                          vertical: theme.spacingMD,
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(theme.radiusMD),
-                        ),
-                        elevation: 8,
-                        shadowColor: theme.primary.withValues(alpha: 0.4),
-                      ),
-                      onPressed: _submit,
-                      child: Text(
-                        widget.task != null ? 'Update Task' : 'Add Task',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        onPressed: _submit,
+                        child: Text(
+                          widget.task != null ? 'Update Task' : 'Add New Tasks',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(height: theme.spacingXL),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
-          ),
-        );
-      },
+            ),
+          );
+        },
+      ),
     );
   }
 }

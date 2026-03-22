@@ -119,7 +119,8 @@ The high-fidelity Kanban-style hub for productivity, focusing on granular task i
   * Tap to Edit task details or notes.
   * Check the circular box to mark as complete.
   * Long-press to delete (with confirmation).
-- Organization: Intuitive Kanban columns with full Drag & Drop support. Move tasks between statuses instantly with persistent reorder handles. Changes are synced instantly to the cloud.
+- Organization: Intuitive Kanban columns with full Drag & Drop support. Move tasks between statuses instantly with persistent reorder handles.
+- **Ambient UI Alignment**: The "Add New Tasks" modal is strictly aligned with the calendar event flow, utilizing standardized 32px radii, filled background fields, and tall action buttons for visual harmony.
 
 D. Calendar Screen
 A visual schedule and performance tracker for your commitments.
@@ -137,13 +138,19 @@ The primary landing experience and analytics hub.
 - Direct Navigation: Tapping the user profile header redirects instantly to the Profile management suite.
 - Refined Layout: Optimized vertical spacing and interactive elements for a premium "Ambient" feel.
 
-F. Profile & Settings Screen
+F. Mind Map (Mind Flow) Screen
+A space for ideation and digital brainstorming.
+- Creative Canvas: A distraction-free environment for capturing thoughts and notes.
+- Ambient Design: Features a spacious layout with dynamic typography and theme-aware styling.
+- Persistence: Uses the same hybrid synchronization strategy as tasks and events, ensuring ideas are never lost.
+
+G. Profile & Settings Screen
 Manage your identity and application environment.
 - Identity Management: The new Profile Suite allows users to update their Display Name and secure their account with Password modifications.
 - Sync Status: Provides transparency on the synchronization state between the local vault and the cloud.
 - Interface Customization: Switch between Light and Dark mode with a seamless "Ambient Background" transition and language selection.
 
-G. Native Notification System
+H. Native Notification System
 A proactive reminder engine that keeps you on track.
 - Lead Time: Sends reminders exactly 30 minutes before a task's deadline or an event's start.
 - Smart Lifecycle: Notifications are automatically canceled if a task is deleted or marked as completed.
@@ -202,9 +209,19 @@ class AmbientBackground extends StatelessWidget {
 }
 ```
 
+D. Navigation Logic (PopScope Pattern)
+Ensures the native back button behaves as expected in a unified scaffold environment.
+```dart
+onPopInvokedWithResult: (didPop, result) {
+  if (didPop) return;
+  // 1. Close Drawer (if open)
+  // 2. Pop Root Navigator (modals like Add Task/Event)
+  // 3. Handle Tab History: Navigates back through recently visited dashboard tabs
+  // 4. Default: Exit App
 }
+```
 
-5. NATIVE NOTIFICATION SYSTEM & SCHEDULING
+6. NATIVE NOTIFICATION SYSTEM & SCHEDULING
 The system implements a precise scheduling strategy using `flutter_local_notifications` and `timezone` to ensure reminders are accurate across different regions.
 
 A. Scheduling Logic
@@ -216,9 +233,9 @@ B. Lifecycle Management
 - **Update**: Modern "Upsert" logic cancels any existing notification for that ID before scheduling a new one based on the updated time.
 
 C. Platform Reliability
-The system is configured with high-priority channels and `SCHEDULE_EXACT_ALARM` permissions to ensure timely delivery on newer versions of Android where battery optimizations often delay background tasks.
+The system is configured with high-priority channels and `SCHEDULE_EXACT_ALARM` permissions to ensure timely delivery on newer versions of Android.
 
-6. GETTING STARTED
+7. GETTING STARTED
 ------------------
 To run the project locally:
 1. Ensure Flutter is installed.
@@ -227,6 +244,6 @@ To run the project locally:
 4. Launch via `flutter run`.
 
 ---
-Current Project State: 1.8.0 - Native Reminders & Mind Flow Release
+Current Project State: 1.8.1 - Navigation Stability & UI Alignment Release
 Documentation maintained by the Taskmaster Engineering Team.
 Dhananjay Saini (GitHub: @dhananjaysaini44)

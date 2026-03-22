@@ -5,8 +5,8 @@ import '../../../core/theme/app_theme_extension.dart';
 import '../domain/models/calendar_event_model.dart';
 import 'providers/events_provider.dart';
 import 'package:intl/intl.dart';
-import 'widgets/add_event_modal.dart';
 import 'event_detail_screen.dart';
+import 'widgets/add_event_modal.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -41,16 +41,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
       body: eventsAsync.when(
         data: (events) => _buildBody(context, theme, events),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddEventModal(context),
-        backgroundColor: theme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: AddEventFab(
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => AddEventModal(initialDate: DateTime.now()),
+        ),
+        theme: theme,
       ),
     );
   }
@@ -61,9 +64,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     List<CalendarEventModel> events,
   ) {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + theme.spacingLG * 0.73,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 0, vertical: theme.spacingLG * 0.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -81,7 +82,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget _buildFocusFlowHeader(AppThemeExtension theme, List<CalendarEventModel> events) {
+  Widget _buildFocusFlowHeader(
+      AppThemeExtension theme, List<CalendarEventModel> events) {
     final dayEvents = _getEventsForDay(_selectedDay ?? DateTime.now(), events);
     final pendingCount = dayEvents.where((e) => !e.isCompleted).length;
     final dateStr = _getOrdinalDate(_selectedDay ?? DateTime.now());
@@ -118,7 +120,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               children: [
                 const TextSpan(text: "You have "),
                 TextSpan(
-                  text: "$pendingCount ${pendingCount == 1 ? 'event' : 'events'}",
+                  text:
+                      "$pendingCount ${pendingCount == 1 ? 'event' : 'events'}",
                   style: TextStyle(
                     color: theme.primary,
                     fontWeight: FontWeight.bold,
@@ -281,7 +284,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       children: [
         if (pendingEvents.isNotEmpty)
           ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
+            padding:
+                EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
             itemCount: pendingEvents.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -294,9 +298,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: theme.spacingLG),
             child: TextButton.icon(
-              onPressed: () => setState(() => _showCompletedEvents = !_showCompletedEvents),
+              onPressed: () =>
+                  setState(() => _showCompletedEvents = !_showCompletedEvents),
               icon: Icon(
-                _showCompletedEvents ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                _showCompletedEvents
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
                 size: 18,
                 color: theme.textSecondary,
               ),
@@ -311,7 +318,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
           if (_showCompletedEvents)
             ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: theme.spacingLG, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                  horizontal: theme.spacingLG, vertical: 8),
               itemCount: completedEvents.length,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -360,7 +368,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               ),
               if (streak > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -413,16 +422,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     }
     return streak;
-  }
-
-  void _showAddEventModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) =>
-          AddEventModal(initialDate: _selectedDay ?? DateTime.now()),
-    );
   }
 }
 
@@ -595,6 +594,26 @@ class _EventCard extends ConsumerWidget {
 
   Color _getCategoryColor(AppThemeExtension theme) {
     return event.isCompleted ? Colors.blue : Colors.red;
+  }
+}
+
+class AddEventFab extends StatelessWidget {
+  final VoidCallback onPressed;
+  final AppThemeExtension theme;
+
+  const AddEventFab({
+    super.key,
+    required this.onPressed,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: onPressed,
+      backgroundColor: theme.primary,
+      child: const Icon(Icons.add, color: Colors.white),
+    );
   }
 }
 

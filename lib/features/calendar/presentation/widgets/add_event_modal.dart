@@ -81,121 +81,128 @@ class _AddEventModalState extends ConsumerState<AddEventModal> {
     final theme = Theme.of(context).appTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
-      decoration: BoxDecoration(
-        color: theme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border.all(
-          color: theme.borderSecondary,
-          width: 1,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        // Standard pop for dialog
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+        decoration: BoxDecoration(
+          color: theme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(
+            color: theme.borderSecondary,
+            width: 1,
+          ),
         ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.event != null ? 'Edit Event' : 'Add New Event',
-                  style: theme.displayLarge.copyWith(fontSize: 28),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.close, color: theme.textPrimary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _titleController,
-              autofocus: true,
-              style: TextStyle(color: theme.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'Event Title',
-                hintStyle: TextStyle(color: theme.textHint),
-                filled: true,
-                fillColor: theme.background,
-                prefixIcon: Icon(Icons.edit_note_rounded, color: theme.primary),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.borderSecondary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.borderSecondary),
-                ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.event != null ? 'Edit Event' : 'Add New Event',
+                    style: theme.displayLarge.copyWith(fontSize: 28),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: theme.textPrimary),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _notesController,
-              style: TextStyle(color: theme.textPrimary),
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Description / Notes',
-                hintStyle: TextStyle(color: theme.textHint),
-                filled: true,
-                fillColor: theme.background,
-                prefixIcon: Icon(Icons.description_rounded, color: theme.primary),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.borderSecondary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.borderSecondary),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildDateTimePicker(theme),
-            const SizedBox(height: 24),
-            _buildCategorySelector(theme),
-            const SizedBox(height: 24),
-            Text(
-              'Accent Color',
-              style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ColorPickerWidget(
-              presets: const [
-                Color(0xFF42A5F5),
-                Color(0xFF66BB6A),
-                Color(0xFFFFA726),
-                Color(0xFFEF5350),
-                Color(0xFFAB47BC),
-              ],
-              selected: _selectedColor,
-              onChanged: (color) => setState(() => _selectedColor = color),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveEvent,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
+              const SizedBox(height: 24),
+              TextField(
+                controller: _titleController,
+                autofocus: true,
+                style: TextStyle(color: theme.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Event Title',
+                  hintStyle: TextStyle(color: theme.textHint),
+                  filled: true,
+                  fillColor: theme.background,
+                  prefixIcon: Icon(Icons.edit_note_rounded, color: theme.primary),
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: theme.borderSecondary),
                   ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  widget.event != null ? 'Update Event' : 'Save Event',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: theme.borderSecondary),
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _notesController,
+                style: TextStyle(color: theme.textPrimary),
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Description / Notes',
+                  hintStyle: TextStyle(color: theme.textHint),
+                  filled: true,
+                  fillColor: theme.background,
+                  prefixIcon: Icon(Icons.description_rounded, color: theme.primary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: theme.borderSecondary),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: theme.borderSecondary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _buildDateTimePicker(theme),
+              const SizedBox(height: 24),
+              _buildCategorySelector(theme),
+              const SizedBox(height: 24),
+              Text(
+                'Accent Color',
+                style: theme.labelSmall.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ColorPickerWidget(
+                presets: const [
+                  Color(0xFF42A5F5),
+                  Color(0xFF66BB6A),
+                  Color(0xFFFFA726),
+                  Color(0xFFEF5350),
+                  Color(0xFFAB47BC),
+                ],
+                selected: _selectedColor,
+                onChanged: (color) => setState(() => _selectedColor = color),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _saveEvent,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    widget.event != null ? 'Update Event' : 'Save Event',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

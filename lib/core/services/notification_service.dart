@@ -33,6 +33,18 @@ class NotificationService {
         // Handle notification tap
       },
     );
+
+    // Request permissions for Android 13+
+    await requestNotificationsPermission();
+  }
+
+  Future<void> requestNotificationsPermission() async {
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImplementation != null) {
+      await androidImplementation.requestNotificationsPermission();
+    }
   }
 
   Future<void> scheduleNotification({
@@ -64,14 +76,31 @@ class NotificationService {
       iOS: DarwinNotificationDetails(),
     );
 
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
-      notificationDetails: notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+    try {
+      // Attempt to schedule with exact precision
+      await _notificationsPlugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      // Fallback to inexact precision if exact is not permitted (common on Android 14+)
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
+          notificationDetails: notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      } catch (innerError) {
+        // Silent fallback
+      }
+    }
   }
 
   Future<void> cancelNotification(int id) async {

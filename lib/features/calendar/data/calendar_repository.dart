@@ -11,6 +11,7 @@ class CalendarRepository {
   final Box _box;
   final _firestore = FirebaseFirestore.instance;
 
+  // ignore: prefer_initializing_formals
   CalendarRepository({required this.uid, required Box box}) : _box = box;
 
   List<CalendarEventModel> loadEventsLocal() {
