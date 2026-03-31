@@ -1,11 +1,14 @@
 # Taskmaster
 
-[<img src="https://img.shields.io/badge/Flutter-%2302569B.svg?style=flat&logo=Flutter&logoColor=white" height="25">](https://flutter.dev)
-[<img src="https://img.shields.io/badge/Dart-%230175C2.svg?style=flat&logo=dart&logoColor=white" height="25">](https://dart.dev)
-[<img src="https://img.shields.io/badge/Riverpod-%2302569B.svg?style=flat&logo=riverpod&logoColor=white" height="25">](https://riverpod.dev)
-[<img src="https://img.shields.io/badge/Hive-%23FDC210.svg?style=flat&logo=hive&logoColor=black" height="25">](https://pub.dev/packages/hive)
-[<img src="https://img.shields.io/badge/Firebase-%23039BE5.svg?style=flat&logo=firebase" height="25">](https://firebase.google.com)
-[<img src="https://img.shields.io/badge/GoRouter-%2302569B.svg?style=flat&logo=flutter&logoColor=white" height="25">](https://pub.dev/packages/go_router)
+![Flutter](https://img.shields.io/badge/Flutter-3.43%2B-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart&logoColor=white)
+![Riverpod](https://img.shields.io/badge/Riverpod-State_Management-1565C0?logo=flutter&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Auth_%26_Firestore-FFCA28?logo=firebase&logoColor=black)
+![Hive](https://img.shields.io/badge/Hive-Offline_Storage-F9A825?logo=databricks&logoColor=white)
+![GoRouter](https://img.shields.io/badge/GoRouter-Navigation-5E35B1?logo=flutter&logoColor=white)
+![Notifications](https://img.shields.io/badge/Notifications-flutter__local__notifications-2E7D32?logo=googlemessages&logoColor=white)
+![Platforms](https://img.shields.io/badge/Platforms-Android_|_iOS_|_Web_|_Desktop-374151?logo=googlechrome&logoColor=white)
+![Version](https://img.shields.io/badge/Version-1.8.1-C62828?logo=semanticrelease&logoColor=white)
 
 Taskmaster is a high-fidelity productivity suite developed with Flutter, designed to provide a sophisticated balance of task management, calendar coordination, and productivity analytics.
 The application adheres to a premium design philosophy, utilizing modern UI techniques including glassmorphism, dynamic gradients, and refined spatial layouts to deliver an immersive and intuitive user experience.
